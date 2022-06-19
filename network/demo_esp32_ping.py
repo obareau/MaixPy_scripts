@@ -12,7 +12,7 @@ SSID = "Sipeed_2.4G"
 PASW = "XXXXXXXX"
 
 if wifi.isconnected() == False:
-    for i in range(5):
+    for _ in range(5):
         try:
             wifi.reset()
             print('try AT connect wifi...')

@@ -13,7 +13,7 @@ from machine import I2C
 
 config_touchscreen_support = True
 board_m1n = False
-   
+
 i2c = I2C(I2C.I2C0, freq=400000, scl=30, sda=31)
 if not board_m1n:
 	lcd.init()
@@ -31,12 +31,8 @@ disp_drv = lv.disp_drv_t()
 lv.disp_drv_init(disp_drv)
 disp_drv.buffer = disp_buf1
 disp_drv.flush_cb = lv_h.flush
-if board_m1n:
-    disp_drv.hor_res = 240
-    disp_drv.ver_res = 240
-else:
-    disp_drv.hor_res = 320
-    disp_drv.ver_res = 240
+disp_drv.hor_res = 240 if board_m1n else 320
+disp_drv.ver_res = 240
 lv.disp_drv_register(disp_drv)
 
 if config_touchscreen_support:
@@ -63,72 +59,67 @@ class lodepng_error(RuntimeError):
 # Taken from https://github.com/shibukawa/imagesize_py/blob/ffef30c1a4715c5acf90e8945ceb77f4a2ed2d45/imagesize.py#L63-L85
 
 def get_png_info(decoder, src, header):
-    # Only handle variable image types
+	# Only handle variable image types
 
-    if lv.img.src_get_type(src) != lv.img.SRC.VARIABLE:
-        return lv.RES.INV
+	if lv.img.src_get_type(src) != lv.img.SRC.VARIABLE:
+	    return lv.RES.INV
 
-    png_header = bytes(lv.img_dsc_t.cast(src).data.__dereference__(24))
+	png_header = bytes(lv.img_dsc_t.cast(src).data.__dereference__(24))
 
-    if png_header.startswith(b'\211PNG\r\n\032\n'):
-        if png_header[12:16] == b'IHDR':
-            start = 16
-        # Maybe this is for an older PNG version.
-        else:
-            start = 8
-        try:
-            width, height = struct.unpack(">LL", png_header[start:start+8])
-        except struct.error:
-            return lv.RES.INV
-    else:
-        return lv.RES.INV
+	if not png_header.startswith(b'\211PNG\r\n\032\n'):
+		return lv.RES.INV
 
-    header.always_zero = 0
-    header.w = width
-    header.h = height
-    header.cf = lv.img.CF.TRUE_COLOR_ALPHA
+	start = 16 if png_header[12:16] == b'IHDR' else 8
+	try:
+	    width, height = struct.unpack(">LL", png_header[start:start+8])
+	except struct.error:
+	    return lv.RES.INV
+	header.always_zero = 0
+	header.w = width
+	header.h = height
+	header.cf = lv.img.CF.TRUE_COLOR_ALPHA
 
-    return lv.RES.OK
+	return lv.RES.OK
 
 # Convert color formats
 
 def convert_rgba8888_to_bgra5658(img_view):
-    img_size = int(len(img_view)) // 4
-    p = img_view
-    j = 0
-    for i in range(img_size):
-        r = p[i*4]
-        g = p[i*4 + 1]
-        b = p[i*4 + 2]
-        a = p[i*4 + 3]
-        j = i*3
-        p[j] = \
-            ((b & 0b11111000) >> 3) |\
-            ((g & 0b00011100) << 3)
-        p[j + 1] = \
-            ((g & 0b11100000) >> 5) |\
-            ((r & 0b11111000) )
-        p[j + 2] = a
+	img_size = len(img_view) // 4
+	p = img_view
+	j = 0
+	for i in range(img_size):
+	    r = p[i*4]
+	    g = p[i*4 + 1]
+	    b = p[i*4 + 2]
+	    a = p[i*4 + 3]
+	    j = i*3
+	    p[j] = \
+	        ((b & 0b11111000) >> 3) |\
+	        ((g & 0b00011100) << 3)
+	    p[j + 1] = \
+	        ((g & 0b11100000) >> 5) |\
+	        ((r & 0b11111000) )
+	    p[j + 2] = a
 
 # Read and parse PNG file
 def open_png(decoder, dsc):
-    img_dsc = lv.img_dsc_t.cast(dsc.src)
-    png_data = img_dsc.data
-    png_size = img_dsc.data_size
-    png_decoded = png.C_Pointer()
-    png_width = png.C_Pointer()
-    png_height = png.C_Pointer()
-    error = png.decode32(png_decoded, png_width, png_height, png_data, png_size)
-    if error:
-        raise lodepng_error(error)
-    img_size = png_width.int_val * png_height.int_val * 4
-    img_data = png_decoded.ptr_val
-    img_view = img_data.__dereference__(img_size)
-    # convert_rgba8888_to_bgra5658(img_view)
-    lv_h.rgba8888_to_5658(img_view)
+	img_dsc = lv.img_dsc_t.cast(dsc.src)
+	png_data = img_dsc.data
+	png_size = img_dsc.data_size
+	png_decoded = png.C_Pointer()
+	png_width = png.C_Pointer()
+	png_height = png.C_Pointer()
+	if error := png.decode32(png_decoded, png_width, png_height, png_data,
+	                         png_size):
+		raise lodepng_error(error)
+	img_size = png_width.int_val * png_height.int_val * 4
+	img_data = png_decoded.ptr_val
+	img_view = img_data.__dereference__(img_size)
+	# convert_rgba8888_to_bgra5658(img_view)
+	lv_h.rgba8888_to_5658(img_view)
 
-    dsc.img_data = img_data
-    return lv.RES.OK
+	dsc.img_data = img_data
+	return lv.RES.OK
 
 # Register new image decoder
 

@@ -13,7 +13,7 @@ PASW = "xxxxxxxx"
 def enable_esp32():
     from network_esp32 import wifi
     if wifi.isconnected() == False:
-        for i in range(5):
+        for _ in range(5):
             try:
                 # Running within 3 seconds of power-up can cause an SD load error
                 # wifi.reset(is_hard=False)
@@ -41,7 +41,7 @@ def network_wiznet5k():
         WIZNET5K_SPI_CS = 20
         spi1 = SPI(4, mode=SPI.MODE_MASTER, baudrate=600 * 1000,
                     polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck=WIZNET5K_SPI_SCK, mosi=WIZNET5K_SPI_MOSI, miso=WIZNET5K_SPI_MISO)
-        for i in range(5):
+        for _ in range(5):
             try:
                 lan.reset(spi1, WIZNET5K_SPI_CS)
                 print('try connect lan...')

@@ -9,15 +9,14 @@ class Task:
     def pre(self):
         print('task start')
         flag = True
-        while flag is True:
+        while flag:
             flag = yield flag
             self.event()
         print('task exit')
 
     def run(self, flag=True):
         try:
-            res = self.cb.send(flag)
-            return res
+            return self.cb.send(flag)
         except StopIteration as e:
             return False
 

@@ -24,8 +24,7 @@ rx = I2S(I2S.DEVICE_0)
 rx.channel_config(rx.CHANNEL_0, rx.RECEIVER, align_mode = I2S.STANDARD_MODE)
 rx.set_sample_rate(sample_rate)
 img = image.Image()
-if hist_x_num > 320:
-    hist_x_num = 320
+hist_x_num = min(hist_x_num, 320)
 hist_width = int(320 / hist_x_num)#changeable
 x_shift = 0
 while True:
@@ -35,10 +34,7 @@ while True:
     img = img.clear()
     x_shift = 0
     for i in range(hist_x_num):
-        if fft_amp[i] > 240:
-            hist_height = 240
-        else:
-            hist_height = fft_amp[i]
+        hist_height = min(fft_amp[i], 240)
         img = img.draw_rectangle((x_shift,240-hist_height,hist_width,hist_height),[255,255,255],2,True)
         x_shift = x_shift + hist_width
     lcd.display(img)

@@ -134,7 +134,6 @@ class SPLCD114:
             self._command(0x2b) #行地址设置
             self._data_16b(y1 + 40)
             self._data_16b(y2 + 40)
-            self._command(0x2c) #储存器写
         elif self.mode == 1:
             self._command(0x2a) #列地址设置
             self._data_16b(x1 + 53)
@@ -142,7 +141,6 @@ class SPLCD114:
             self._command(0x2b) #行地址设置
             self._data_16b(y1 + 40)
             self._data_16b(y2 + 40)
-            self._command(0x2c) #储存器写
         elif self.mode == 2:
             self._command(0x2a) #列地址设置
             self._data_16b(x1 + 40)
@@ -150,7 +148,6 @@ class SPLCD114:
             self._command(0x2b) #行地址设置
             self._data_16b(y1 + 53)
             self._data_16b(y2 + 53)
-            self._command(0x2c) #储存器写
         else:
             self._command(0x2a) #列地址设置
             self._data_16b(x1 + 40)
@@ -158,7 +155,8 @@ class SPLCD114:
             self._command(0x2b) #行地址设置
             self._data_16b(y1 + 52)
             self._data_16b(y2 + 52)
-            self._command(0x2c) #储存器写
+
+        self._command(0x2c) #储存器写
 
     def display(self,img):
         img1 = image.Image()
@@ -211,7 +209,7 @@ if __name__ == "__main__":
     rst = GPIO(GPIO.GPIOHS7, GPIO.OUT)
 
     ips = SPLCD114(spi1, cs, dc, rst, busy, IPS_WIDTH, IPS_HEIGHT, IPS_MODE)
-    
+
     img = image.Image()
     img.draw_line(0, 0, 100, 100)
     img.draw_circle(50, 50, 20)

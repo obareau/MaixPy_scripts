@@ -6,8 +6,7 @@ i2c = I2C(I2C.I2C0,freq=100000, scl=28, sda=29)
 
 def pca_setfreq(freqs):
     freqs *= 0.92
-    prescaleval = 25000000
-    prescaleval /= 4096
+    prescaleval = 25000000 / 4096
     prescaleval /= freqs
     prescaleval -= 1
     prescale =int(prescaleval + 0.5)
@@ -56,10 +55,7 @@ def pca_init(hz,angle): #初始化函数
 
 def pca_mg90(num,start_angle,end_angle,mode,speed):
     off = 0
-    if mode==0:
-        off=int(158+end_angle*2.2)
-        pca_setpwm(num,0,off)
-    elif mode==1:
+    if mode in [0, 1]:
         off=int(158+end_angle*2.2)
         pca_setpwm(num,0,off)
     #未完待续

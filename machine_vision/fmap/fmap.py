@@ -19,32 +19,32 @@ while True:
     # a=img2.strech_char(1)			#preprocessing pictures, eliminate dark corner
     img2x2=img2.resize(28*2,28*2)	#scale to display
     a = img_lcd.draw_image(img2x2,0,0)#display small 28x28 picture
-    a=img2.pix_to_ai();				#generate data for ai
+    a=img2.pix_to_ai()
     #watch conv0
-    a=kpu.set_layers(task, 1)			
+    a=kpu.set_layers(task, 1)
     fmap=kpu.forward(task,img2)		#run neural network model
-    for i in range(0,16):
+    for i in range(16):
         tmp=kpu.fmap(fmap,i)
         tmpx2=tmp.resize(14*2,14*2) #scale to display
         a=img_lcd.draw_image(tmpx2,(i%8)*14*2,28*2+14*2*int(i/8))
     #watch conv1
-    a=kpu.set_layers(task, 2)			
+    a=kpu.set_layers(task, 2)
     fmap=kpu.forward(task,img2)		#run neural network model
-    for i in range(0,32):
+    for i in range(32):
         tmp=kpu.fmap(fmap,i)
         tmpx2=tmp.resize(7*2,7*2)   #scale to display
         a=img_lcd.draw_image(tmpx2,(i%16)*7*2,28*2+14*2*2+7*2*int(i/16))
     #watch conv2
-    a=kpu.set_layers(task, 8)			
+    a=kpu.set_layers(task, 8)
     fmap=kpu.forward(task,img2)		#run neural network model
-    for i in range(0,10):
+    for i in range(10):
         tmp=kpu.fmap(fmap,i)
         tmpx2=tmp.resize(4*2,4*2)   #scale to display
         a=img_lcd.draw_image(tmpx2,i*4*2,28*2+14*2*2+7*2*2)
     #watch softmax
     a=kpu.set_layers(task, 11)
-    fmap=kpu.forward(task,img2)	
+    fmap=kpu.forward(task,img2)
     plist=fmap[:]
-    for i in range(0,10):
+    for i in range(10):
         cc = int(plist[i]*256)
     lcd.display(img_lcd)

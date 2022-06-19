@@ -52,11 +52,11 @@ names = ['Mr.1', 'Mr.2', 'Mr.3', 'Mr.4', 'Mr.5',
 
 ACCURACY = 85
 
-while (1):
+while 1:
     img = sensor.snapshot()
     clock.tick()
-    code = kpu.run_yolo2(task_fd, img)
-    if code:
+    if code := kpu.run_yolo2(task_fd, img):
+        reg_flag = False
         for i in code:
             # Cut face and resize to 128x128
             a = img.draw_rectangle(i.rect())
@@ -87,10 +87,9 @@ while (1):
             # calculate face feature vector
             fmap = kpu.forward(task_fe, img_face)
             feature = kpu.face_encode(fmap[:])
-            reg_flag = False
             scores = []
-            for j in range(len(record_ftrs)):
-                score = kpu.face_compare(record_ftrs[j], feature)
+            for record_ftr_ in record_ftrs:
+                score = kpu.face_compare(record_ftr_, feature)
                 scores.append(score)
             max_score = 0
             index = 0

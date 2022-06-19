@@ -24,10 +24,7 @@ while True:
     if draw:
         img.draw_line((x_last, y_last, x, y))
     if status_last!=status:
-        if (status==ts.STATUS_PRESS or status == ts.STATUS_MOVE):
-            draw = True
-        else:
-            draw = False
+        draw = status in [ts.STATUS_PRESS, ts.STATUS_MOVE]
         status_last = status
     lcd.display(img)
     x_last = x

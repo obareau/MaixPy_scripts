@@ -40,18 +40,22 @@ class Page_Buttons:
         self.btn1 = SymbolButton(page, lv.SYMBOL.PLAY, "Play")
         self.btn1.set_size(80,80)
         self.btn1.align(page, lv.ALIGN.IN_TOP_LEFT, 30, 30)
-        
+
         self.btn2 = SymbolButton(page, lv.SYMBOL.PAUSE, "Pause")
         self.btn2.set_size(80,80)
         self.btn2.align(page, lv.ALIGN.IN_TOP_RIGHT, -30, 30)
-    
+
         self.label = lv.label(page)
         self.label.align(page, lv.ALIGN.IN_BOTTOM_LEFT, 30, -30)
 
         # Currently only single callback per object is supported
 
         for btn, name in [(self.btn1, 'Play'), (self.btn2, 'Pause')]:
-            btn.set_event_cb(lambda obj=None, event=-1, name=name: self.label.set_text('%s %s' % (name, get_member_name(lv.EVENT, event))))
+            btn.set_event_cb(
+                lambda obj=None, event=-1, name=name: self.label.set_text(
+                    f'{name} {get_member_name(lv.EVENT, event)}'
+                )
+            )
 
 
 class Page_Simple:
@@ -196,10 +200,10 @@ class AdvancedDemoApplication():
         import lcd
         import time
         from machine import I2C
-        
+
         config_touchscreen_support = True
         board_m1n = False
-        
+
         i2c = I2C(I2C.I2C0, freq=400000, scl=30, sda=31)
         if not board_m1n:
             lcd.init()
@@ -217,12 +221,8 @@ class AdvancedDemoApplication():
         lv.disp_drv_init(disp_drv)
         disp_drv.buffer = disp_buf1
         disp_drv.flush_cb = lv_h.flush
-        if board_m1n:
-            disp_drv.hor_res = 240
-            disp_drv.ver_res = 240
-        else:
-            disp_drv.hor_res = 320
-            disp_drv.ver_res = 240
+        disp_drv.hor_res = 240 if board_m1n else 320
+        disp_drv.ver_res = 240
         lv.disp_drv_register(disp_drv)
 
         if config_touchscreen_support:

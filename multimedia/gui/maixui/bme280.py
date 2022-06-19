@@ -178,8 +178,8 @@ class BME280:
                             (((h * self.dig_H3) >> 11) + 32768)) >> 10) +
                           2097152) * self.dig_H2 + 8192) >> 14))
         h = h - (((((h >> 15) * (h >> 15)) >> 7) * self.dig_H1) >> 4)
-        h = 0 if h < 0 else h
-        h = 419430400 if h > 419430400 else h
+        h = max(h, 0)
+        h = min(h, 419430400)
         humidity = h >> 12
 
         if result:
@@ -202,8 +202,11 @@ class BME280:
 
         hi = h // 1024
         hd = h * 100 // 1024 - hi * 100
-        return ("{}C".format(t / 100), "{}.{:02d}hPa".format(pi, pd),
-                "{}.{:02d}%".format(hi, hd))
+        return (
+            f"{t / 100}C",
+            "{}.{:02d}hPa".format(pi, pd),
+            "{}.{:02d}%".format(hi, hd),
+        )
 
 if __name__ == "__main__":
 

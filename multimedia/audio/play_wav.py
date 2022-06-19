@@ -4,8 +4,6 @@ import audio
 
 ########### settings ############
 WIFI_EN_PIN = 8
-# AUDIO_PA_EN_PIN = None  # Bit Dock and old MaixGo
-AUDIO_PA_EN_PIN = 32      # Maix Go(version 2.20)
 # AUDIO_PA_EN_PIN = 2     # Maixduino
 
 
@@ -14,8 +12,7 @@ fm.register(WIFI_EN_PIN, fm.fpioa.GPIO0, force=True)
 wifi_en = GPIO(GPIO.GPIO0, GPIO.OUT)
 wifi_en.value(0)
 
-# open audio PA
-if AUDIO_PA_EN_PIN:
+if AUDIO_PA_EN_PIN := 32:
     fm.register(AUDIO_PA_EN_PIN, fm.fpioa.GPIO1, force=True)
     wifi_en = GPIO(GPIO.GPIO1, GPIO.OUT)
     wifi_en.value(1)
@@ -44,7 +41,7 @@ wav_dev.set_sample_rate(wav_info[1])
 # loop to play audio
 while True:
     ret = player.play()
-    if ret == None:
+    if ret is None:
         print("format error")
         break
     elif ret == 0:

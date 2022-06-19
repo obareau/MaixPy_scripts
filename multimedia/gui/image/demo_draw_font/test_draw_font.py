@@ -2,18 +2,17 @@
 def encode_get_utf8_size(utf):
     if utf < 0x80:
         return 1
-    if utf >= 0x80 and utf < 0xC0:
+    if utf < 0xC0:
         return -1
-    if utf >= 0xC0 and utf < 0xE0:
+    if utf < 0xE0:
         return 2
-    if utf >= 0xE0 and utf < 0xF0:
+    if utf < 0xF0:
         return 3
-    if utf >= 0xF0 and utf < 0xF8:
+    if utf < 0xF8:
         return 4
-    if utf >= 0xF8 and utf < 0xFC:
+    if utf < 0xFC:
         return 5
-    if utf >= 0xFC:
-        return 6
+    return 6
 
 def encode_utf8_to_unicode(utf8):
     utfbytes = encode_get_utf8_size(utf8[0])

@@ -135,11 +135,11 @@ class SSD1306:
             self._write_register(0x00, i)
 
     def fill(self, data):
-        for i in range(0,8):
+        for i in range(8):
             self._write_register(0x00, 0xb0+i)
             self._write_register(0x00, 0x10)
             self._write_register(0x00, 0x01)
-            for j in range(0,128):
+            for _ in range(128):
                 self._write_register(0x40, data)
 
     def text (self, STR, x, y ):

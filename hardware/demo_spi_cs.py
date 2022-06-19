@@ -13,8 +13,8 @@ fm.register(26,fm.fpioa.SPI1_D1, force=True)#miso
 fm.register(27,fm.fpioa.SPI1_SCLK, force=True)#sclk
 spi1 = SPI(SPI.SPI1, mode=SPI.MODE_MASTER, baudrate=10000000, polarity=0, phase=0, bits=8, firstbit=SPI.MSB)
 
+w = b'\xFF'
 while True:
-  w = b'\xFF'
   r = bytearray(1)
   cs.value(0)
   print(spi1.write_readinto(w, r))

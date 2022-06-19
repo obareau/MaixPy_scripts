@@ -43,9 +43,9 @@ state = 0
 try:
   nes.init(nes.INPUT)
   nes.load("mario.nes")
-  for i in range(20000):
+  for _ in range(20000):
     nes.loop()
-  for i in range(500):
+  for _ in range(500):
     nes.loop()
     nes.input(8, 0, 0)
     nes.loop()

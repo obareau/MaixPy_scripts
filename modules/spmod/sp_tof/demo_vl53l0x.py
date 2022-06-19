@@ -252,8 +252,7 @@ class VL53L0X:
 		  (0x80, 0x00),
 		)
 		if period:
-			oscilator = self._register(_OSC_CALIBRATE, struct='>H')
-			if oscilator:
+			if oscilator := self._register(_OSC_CALIBRATE, struct='>H'):
 				period *= oscilator
 			self._register(_MEASURE_PERIOD, period, struct='>H')
 			self._register(_SYSRANGE_START, 0x04)
@@ -324,4 +323,4 @@ if __name__ == "__main__":
 	while True:
 		mm = tof.read()
 		utime.sleep_ms(100)
-		print("{}mm".format(mm))
+		print(f"{mm}mm")

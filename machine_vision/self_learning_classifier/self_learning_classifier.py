@@ -58,9 +58,8 @@ while 1:
     if board_cube:
         img = img.rotation_corr(z_rotation=90)
         img.pix_to_ai()
-    # capture img
-    if train_status == 0:
-        if key.value() == 0:
+    if key.value() == 0:
+        if train_status == 0:
             time.sleep_ms(30)
             if key.value() == 0 and (last_btn_status == 1) and (time.ticks_ms() - last_cap_time > 500):
                 last_btn_status = 0
@@ -75,14 +74,32 @@ while 1:
                     print("add sample img:", index)
             else:
                 img = draw_string(img, 2, 200, "release boot key please", color=lcd.WHITE,scale=1, bg=lcd.RED)
-        else:
-            time.sleep_ms(30)
-            if key.value() == 1 and (last_btn_status == 0):
-                last_btn_status = 1
-            if cap_num < class_num:
-                img = draw_string(img, 0, 200, "press boot key to cap "+class_names[cap_num], color=lcd.WHITE,scale=1, bg=lcd.RED)
-            elif cap_num < class_num + sample_num:
-                img = draw_string(img, 0, 200, "boot key to cap sample{}".format(cap_num-class_num), color=lcd.WHITE,scale=1, bg=lcd.RED)
+    elif train_status == 0:
+        time.sleep_ms(30)
+        if key.value() == 1 and (last_btn_status == 0):
+            last_btn_status = 1
+        if cap_num < class_num:
+            img = draw_string(
+                img,
+                0,
+                200,
+                f"press boot key to cap {class_names[cap_num]}",
+                color=lcd.WHITE,
+                scale=1,
+                bg=lcd.RED,
+            )
+
+        elif cap_num < class_num + sample_num:
+            img = draw_string(
+                img,
+                0,
+                200,
+                f"boot key to cap sample{cap_num - class_num}",
+                color=lcd.WHITE,
+                scale=1,
+                bg=lcd.RED,
+            )
+
     # train and predict
     if train_status == 0:
         if cap_num >= class_num + sample_num:
@@ -91,7 +108,7 @@ while 1:
             lcd.display(img)
             classifier.train()
             print("train end")
-            train_status = 1    
+            train_status = 1
     else:
         res_index = -1
         try:
@@ -99,12 +116,21 @@ while 1:
             print("{:.2f}".format(min_dist))
         except Exception as e:
             print("predict err:", e)
-        if res_index >= 0 and min_dist < THRESHOLD :
+        if res_index >= 0 and min_dist < THRESHOLD:
             print("predict result:", class_names[res_index])
             img = draw_string(img, 2, 2, class_names[res_index], color=lcd.WHITE,scale=2, bg=lcd.RED)
         else:
             print("unknown, maybe:", class_names[res_index])
-            img = draw_string(img, 2, 2, 'maybe {}'.format(class_names[res_index]), color=lcd.WHITE,scale=2, bg=lcd.RED)
+            img = draw_string(
+                img,
+                2,
+                2,
+                f'maybe {class_names[res_index]}',
+                color=lcd.WHITE,
+                scale=2,
+                bg=lcd.RED,
+            )
+
     lcd.display(img)
 
 # You can save trained data to file system by:

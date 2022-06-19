@@ -31,11 +31,11 @@ class wifi():
         fm.register(board_info.WIFI_TX,fm.fpioa.UART2_RX) # board_info.WIFI_TX == IO 6
         __class__.uart = UART(UART.UART2, 115200, timeout=1000, read_buf_len=8192)
 
-    def enable(en):
-        __class__.en.value(en)
+    def enable(self):
+        __class__.en.value(self)
 
-    def _at_cmd(cmd="AT\r\n", resp="OK\r\n", timeout=20):
-        __class__.uart.write(cmd) # "AT+GMR\r\n"
+    def _at_cmd(self, resp="OK\r\n", timeout=20):
+        __class__.uart.write(self)
         time.sleep_ms(timeout)
         tmp = __class__.uart.read()
         # print(tmp)
@@ -43,17 +43,16 @@ class wifi():
             return True
         return False
 
-    def at_cmd(cmd="AT\r\n", timeout=20):
-        __class__.uart.write(cmd) # "AT+GMR\r\n"
+    def at_cmd(self, timeout=20):
+        __class__.uart.write(self)
         time.sleep_ms(timeout)
-        tmp = __class__.uart.read()
-        return tmp
+        return __class__.uart.read()
 
-    def reset(force=False, reply=5):
-        if force == False and __class__.isconnected():
+    def reset(self, reply=5):
+        if self == False and __class__.isconnected():
             return True
         __class__.init()
-        for i in range(reply):
+        for _ in range(reply):
             print('reset...')
             __class__.enable(False)
             time.sleep_ms(50)
@@ -74,18 +73,16 @@ class wifi():
             return False
         return True
 
-    def connect(ssid="wifi_name", pasw="pass_word"):
+    def connect(self, pasw="pass_word"):
         if __class__.nic != None:
-            return __class__.nic.connect(ssid, pasw)
+            return __class__.nic.connect(self, pasw)
 
     def ifconfig(): # should check ip != 0.0.0.0
         if __class__.nic != None:
             return __class__.nic.ifconfig()
 
     def isconnected():
-        if __class__.nic != None:
-            return __class__.nic.isconnected()
-        return False
+        return __class__.nic.isconnected() if __class__.nic != None else False
 
 if __name__ == "__main__":
     # It is recommended to callas a class library (upload network_espat.py) 
@@ -96,7 +93,7 @@ if __name__ == "__main__":
 
     def check_wifi_net(reply=5):
         if wifi.isconnected() != True:
-            for i in range(reply):
+            for _ in range(reply):
                 try:
                     wifi.reset()
                     print('try AT connect wifi...', wifi._at_cmd())

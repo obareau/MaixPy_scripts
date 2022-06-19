@@ -16,13 +16,11 @@ import video
 v = video.open("/sd/capture.avi", audio = False, record=1, interval=200000, quality=50)
 
 tim = time.ticks_ms()
-for i in range(50):
+for _ in range(50):
     tim = time.ticks_ms()
     img = sensor.snapshot()
     lcd.display(img)
     img_len = v.record(img)
-    # print("record",time.ticks_ms() - tim)
-
 print("record_finish")
 v.record_finish()
 v.__del__()

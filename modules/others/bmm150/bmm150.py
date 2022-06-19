@@ -165,11 +165,10 @@ class BMM150:
         self.set_power_bit(ENABLE_POWER)
         chip_id = self.get_chip_id()
         print("chip_id:", hex(chip_id))
-        if chip_id == CHIP_ID_VALUE:
-            self.get_trim_data()
-            return 0
-        else:
+        if chip_id != CHIP_ID_VALUE:
             return -1
+        self.get_trim_data()
+        return 0
 
     # soft reset
     def soft_reset(self):
@@ -205,8 +204,7 @@ class BMM150:
             rslt = self.i2cDev.readfrom_mem(self.bmm150Addr, REG_DATA_X_LSB, 5)
             rslt1 = []
             rslt1 = self.change_date(rslt, 5)
-            number = (rslt1[0] & 0x01) | (rslt1[2] & 0x01) << 1 | (rslt1[4] & 0x01) << 2
-            return number
+            return (rslt1[0] & 0x01) | (rslt1[2] & 0x01) << 1 | (rslt1[4] & 0x01) << 2
         else:
             return -1
 
@@ -222,11 +220,11 @@ class BMM150:
         rslt1 = self.change_date(rslt, 1)
         if ctrl == DISABLE_POWER:
             self.__txbuf[0] = rslt1[0] & 0xFE
-            self.i2cDev.writeto_mem(self.bmm150Addr, CTRL_POWER_REGISTER, self.__txbuf[0])
         else:
             self.__txbuf[0] = rslt1[0] | 0x01
             print("power enable", hex(self.__txbuf[0]))
-            self.i2cDev.writeto_mem(self.bmm150Addr, CTRL_POWER_REGISTER, self.__txbuf[0])
+
+        self.i2cDev.writeto_mem(self.bmm150Addr, CTRL_POWER_REGISTER, self.__txbuf[0])
 
     '''
     @brief get power bit
@@ -280,10 +278,9 @@ class BMM150:
     def get_operation_mode(self):
         if self.get_power_bit() == 0:
             return POWERMODE_SUSPEND
-        else:
-            rslt = self.i2cDev.readfrom_mem(self.bmm150Addr, MODE_RATE_REGISTER, 1)
-            rslt1 = self.change_date(rslt, 1)
-            return hex((rslt1[0] & 0x03))
+        rslt = self.i2cDev.readfrom_mem(self.bmm150Addr, MODE_RATE_REGISTER, 1)
+        rslt1 = self.change_date(rslt, 1)
+        return hex((rslt1[0] & 0x03))
 
     '''
     @brief set rate
@@ -304,31 +301,24 @@ class BMM150:
         rslt1 = self.change_date(rslt, 1)
         if rates == RATE_10HZ:
             rslt1[0] = rslt1[0] & 0xc7
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         elif rates == RATE_02HZ:
             rslt1[0] = (rslt1[0] & 0xc7) | 0x08
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         elif rates == RATE_06HZ:
             rslt1[0] = (rslt1[0] & 0xc7) | 0x10
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         elif rates == RATE_08HZ:
             rslt1[0] = (rslt1[0] & 0xc7) | 0x18
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         elif rates == RATE_15HZ:
             rslt1[0] = (rslt1[0] & 0xc7) | 0x20
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         elif rates == RATE_20HZ:
             rslt1[0] = (rslt1[0] & 0xc7) | 0x28
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         elif rates == RATE_25HZ:
             rslt1[0] = (rslt1[0] & 0xc7) | 0x30
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         elif rates == RATE_30HZ:
             rslt1[0] = (rslt1[0] & 0xc7) | 0x38
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
         else:
             rslt1[0] = rslt1[0] & 0xc7
-            self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
+
+        self.i2cDev.writeto_mem(self.bmm150Addr, MODE_RATE_REGISTER, rslt1[0])
 
     '''
    @brief get rates
@@ -358,7 +348,11 @@ class BMM150:
     '''
 
     def set_preset_mode(self, modes):
-        if modes == PRESETMODE_LOWPOWER:
+        if modes == PRESETMODE_LOWPOWER or modes not in [
+            PRESETMODE_REGULAR,
+            PRESETMODE_HIGHACCURACY,
+            PRESETMODE_ENHANCED,
+        ]:
             self.set_rate(RATE_10HZ)
             self.set_xy_rep(REPXY_LOWPOWER)
             self.set_z_rep(REPZ_LOWPOWER)
@@ -370,14 +364,10 @@ class BMM150:
             self.set_rate(RATE_20HZ)
             self.set_xy_rep(REPXY_HIGHACCURACY)
             self.set_z_rep(REPZ_HIGHACCURACY)
-        elif modes == PRESETMODE_ENHANCED:
+        else:
             self.set_rate(RATE_10HZ)
             self.set_xy_rep(REPXY_ENHANCED)
             self.set_z_rep(REPZ_ENHANCED)
-        else:
-            self.set_rate(RATE_10HZ)
-            self.set_xy_rep(REPXY_LOWPOWER)
-            self.set_z_rep(REPZ_LOWPOWER)
 
 
 
@@ -393,17 +383,14 @@ class BMM150:
 
     def set_xy_rep(self, modes):
         self.__txbuf[0] = modes
-        if modes == REPXY_LOWPOWER:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_XY, self.__txbuf[0])
-        elif modes == REPXY_REGULAR:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_XY, self.__txbuf[0])
-        elif modes == REPXY_ENHANCED:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_XY, self.__txbuf[0])
-        elif modes == REPXY_HIGHACCURACY:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_XY, self.__txbuf[0])
-        else:
+        if modes not in [
+            REPXY_LOWPOWER,
+            REPXY_REGULAR,
+            REPXY_ENHANCED,
+            REPXY_HIGHACCURACY,
+        ]:
             __txbuf[0] = REPXY_LOWPOWER####################################
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_XY, self.__txbuf[0])
+        self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_XY, self.__txbuf[0])
 
 
     '''
@@ -418,17 +405,14 @@ class BMM150:
 
     def set_z_rep(self, modes):
         self.__txbuf[0] = modes
-        if modes == REPZ_LOWPOWER:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_Z, self.__txbuf[0])
-        elif modes == REPZ_REGULAR:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_Z, self.__txbuf[0])
-        elif modes == REPZ_ENHANCED:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_Z, self.__txbuf[0])
-        elif modes == REPZ_HIGHACCURACY:
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_Z, self.__txbuf[0])
-        else:
+        if modes not in [
+            REPZ_LOWPOWER,
+            REPZ_REGULAR,
+            REPZ_ENHANCED,
+            REPZ_HIGHACCURACY,
+        ]:
             __txbuf[0] = REPZ_LOWPOWER ####################################
-            self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_Z, self.__txbuf[0])
+        self.i2cDev.writeto_mem(self.bmm150Addr,REG_REP_Z, self.__txbuf[0])
 
 
     '''
@@ -484,10 +468,7 @@ class BMM150:
 
 
     def uint8_to_int8(self, number):
-        if number <= 127:
-            return number
-        else:
-            return (256 - number) * -1
+        return number if number <= 127 else (256 - number) * -1
 
 
     '''
@@ -507,7 +488,7 @@ class BMM150:
                 process_comp_x1 = int(_trim_data.dig_xyz1 * 16384)
                 process_comp_x2 = int(process_comp_x1 / process_comp_x0 - 0x4000)
                 retval = process_comp_x2
-                process_comp_x3 = retval * retval
+                process_comp_x3 = retval**2
                 process_comp_x4 = _trim_data.dig_xy2 * (process_comp_x3 / 128)
                 process_comp_x5 = _trim_data.dig_xy1 * 128
                 process_comp_x6 = retval * process_comp_x5
@@ -541,7 +522,7 @@ class BMM150:
                 process_comp_y1 = int(_trim_data.dig_xyz1 * 16384 / process_comp_y0)
                 process_comp_y2 = int(process_comp_y1 - 0x4000)
                 retval = process_comp_y2
-                process_comp_y3 = retval * retval
+                process_comp_y3 = retval**2
                 process_comp_y4 = _trim_data.dig_xy2 * (process_comp_y3 / 128)
                 process_comp_y5 = _trim_data.dig_xy1 * 128
                 process_comp_y6 = (process_comp_y4 + process_comp_y5 * retval) / 512
@@ -596,10 +577,7 @@ class BMM150:
 
     def set_data_readly_interrupt_pin(self, modes, polarity):
         rslt = self.i2cDev.readfrom_mem(self.bmm150Addr,REG_INT_CONFIG, 1)
-        if modes == DISABLE_DRDY:
-            self.__txbuf[0] = rslt[0] & 0x7F
-        else:
-            self.__txbuf[0] = rslt[0] | 0x80
+        self.__txbuf[0] = rslt[0] & 0x7F if modes == DISABLE_DRDY else rslt[0] | 0x80
         if polarity == POKARITY_LOW:
             self.__txbuf[0] = self.__txbuf[0] & 0xFB
         else:
@@ -668,16 +646,19 @@ class BMM150:
 
     def get_measurement_state_xyz(self, channel):
         rslt = self.i2cDev.readfrom_mem(self.bmm150Addr,REG_AXES_ENABLE, 1)
-        if channel == CHANNEL_X:
-            if (rslt[0] & 0x08) == 0:
-                return 1
-        elif channel == CHANNEL_Y:
-            if (rslt[0] & 0x10) == 0:
-                return 1
-        elif channel == CHANNEL_Z:
-            if (rslt[0] & 0x20) == 0:
-                return 1
-        else:
+        if (
+            channel == CHANNEL_X
+            and (rslt[0] & 0x08) == 0
+            or channel != CHANNEL_X
+            and channel == CHANNEL_Y
+            and (rslt[0] & 0x10) == 0
+            or channel != CHANNEL_X
+            and channel != CHANNEL_Y
+            and channel == CHANNEL_Z
+            and (rslt[0] & 0x20) == 0
+        ):
+            return 1
+        elif channel not in [CHANNEL_X, CHANNEL_Y, CHANNEL_Z]:
             return 0
         return 0
 
@@ -839,10 +820,7 @@ class BMM150:
         return (rslt[0] & 0x38) >> 3
 
     def change_date(self, rslt, num):
-        rslt_change = []
-        for i in range(num):
-            rslt_change.append(rslt[i])
-        return rslt_change
+        return [rslt[i] for i in range(num)]
 
     def calibrate(self, count=256, delay=200):
 

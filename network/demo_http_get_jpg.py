@@ -13,7 +13,7 @@ PASW = "xxxxxxxx"
 def enable_esp32():
     from network_esp32 import wifi
     if wifi.isconnected() == False:
-        for i in range(5):
+        for _ in range(5):
             try:
                 # Running within 3 seconds of power-up can cause an SD load error
                 # wifi.reset(is_hard=False)
@@ -33,7 +33,7 @@ enable_esp32()
 def enable_espat():
     from network_espat import wifi
     if wifi.isconnected() == False:
-        for i in range(5):
+        for _ in range(5):
             try:
                 # Running within 3 seconds of power-up can cause an SD load error
                 # wifi.reset(is_hard=False)
@@ -59,7 +59,7 @@ def network_wiznet5k():
         WIZNET5K_SPI_CS = 20
         spi1 = SPI(4, mode=SPI.MODE_MASTER, baudrate=600 * 1000,
                     polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck=WIZNET5K_SPI_SCK, mosi=WIZNET5K_SPI_MOSI, miso=WIZNET5K_SPI_MISO)
-        for i in range(5):
+        for _ in range(5):
             try:
                 lan.reset(spi1, WIZNET5K_SPI_CS)
                 print('try connect lan...')
@@ -127,7 +127,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None, parse_he
         elif proto == "https:":
             port = 443
         else:
-            raise ValueError("Unsupported protocol: " + proto)
+            raise ValueError(f"Unsupported protocol: {proto}")
 
         if ":" in host:
             host, port = host.split(":", 1)
@@ -146,7 +146,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None, parse_he
             if proto == "https:":
                 s = ssl.wrap_socket(s, server_hostname=host)
             s.write(b"%s /%s HTTP/1.0\r\n" % (method, path))
-            if not "Host" in headers:
+            if "Host" not in headers:
                 s.write(b"Host: %s\r\n" % host)
             # Iterate over keys to avoid tuple alloc
             for k in headers:
@@ -177,7 +177,7 @@ def request(method, url, data=None, json=None, headers={}, stream=None, parse_he
 
                 if l.startswith(b"Transfer-Encoding:"):
                     if b"chunked" in l:
-                        raise ValueError("Unsupported " + l)
+                        raise ValueError(f"Unsupported {l}")
                 elif l.startswith(b"Location:") and 300 <= status <= 399:
                     if not redir_cnt:
                         raise ValueError("Too many redirects")
@@ -241,16 +241,17 @@ headers = {
 res = get("http://static.sipeed.com/example/MaixPy.jpg", headers=headers)
 print("response:", res.status_code)
 content = res.content
-print("get img, length:{}, should be:{}".format(
-    len(content), int(res.headers['Content-Length'])))
+print(
+    f"get img, length:{len(content)}, should be:{int(res.headers['Content-Length'])}"
+)
+
 
 if len(content) != int(res.headers['Content-Length']):
     print("download img fail, not complete, try again")
 else:
     print("save to /flash/MaixPy.jpg")
-    f = open("/flash/MaixPy.jpg", "wb")
-    f.write(content)
-    f.close()
+    with open("/flash/MaixPy.jpg", "wb") as f:
+        f.write(content)
     del content
     print("save ok")
     print("display")

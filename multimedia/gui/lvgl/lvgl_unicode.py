@@ -87,7 +87,7 @@ from machine import I2C
 
 config_touchscreen_support = True
 board_m1n = False
-   
+
 if not board_m1n:
 	lcd.init()
 else:
@@ -98,8 +98,7 @@ if config_touchscreen_support:
 	ts.init(i2c)
 
 try:
-	if lv_init_end:
-		pass
+    pass
 except Exception:
 	lv.init()
 	lv_init_end = True
@@ -111,12 +110,8 @@ disp_drv = lv.disp_drv_t()
 lv.disp_drv_init(disp_drv)
 disp_drv.buffer = disp_buf1
 disp_drv.flush_cb = lv_h.flush
-if board_m1n:
-    disp_drv.hor_res = 240
-    disp_drv.ver_res = 240
-else:
-    disp_drv.hor_res = 320
-    disp_drv.ver_res = 240
+disp_drv.hor_res = 240 if board_m1n else 320
+disp_drv.ver_res = 240
 lv.disp_drv_register(disp_drv)
 
 if config_touchscreen_support:
@@ -133,24 +128,21 @@ lv.log_register_print_cb(lambda level,path,line,msg: print('%s(%d): %s' % (path,
 font_bitmap = None
 
 def my_get_glyph_dsc_cb(font, dsc_out, unicode_letter, unicode_letter_next):
-	global font_bitmap
-	# get bitmap
-	ret = get_ch(unicode_letter)
-	# convert bitmap to what lvgl supported
-	dsc_out.adv_w = 16 #max_width()
-	dsc_out.box_h = (ret[1]+7) & 0xF8
-	dsc_out.box_w = (ret[2]+7) & 0xF8
-	dsc_out.ofs_x = 0
-	dsc_out.ofs_y = 0
-	dsc_out.bpp   = 1
-	font_bitmap = bytes(ret[0])
-	if dsc_out.box_h != ret[1]: # fill
-		if reverse():
-			fill = 0xFF
-		else:
-			fill = 0x00
-		font_bitmap += bytes([fill]*(dsc_out.box_w//8 * (dsc_out.box_h-ret[1]) ))
-	return True
+    global font_bitmap
+    # get bitmap
+    ret = get_ch(unicode_letter)
+    # convert bitmap to what lvgl supported
+    dsc_out.adv_w = 16 #max_width()
+    dsc_out.box_h = (ret[1]+7) & 0xF8
+    dsc_out.box_w = (ret[2]+7) & 0xF8
+    dsc_out.ofs_x = 0
+    dsc_out.ofs_y = 0
+    dsc_out.bpp   = 1
+    if dsc_out.box_h != ret[1]: # fill
+        fill = 0xFF if reverse() else 0x00
+        font_bitmap = bytes(ret[0])
+        font_bitmap += bytes([fill]*(dsc_out.box_w//8 * (dsc_out.box_h-ret[1]) ))
+    return True
 
 def my_get_glyph_bitmap_cb( font, unicode_letter):
 	global font_bitmap

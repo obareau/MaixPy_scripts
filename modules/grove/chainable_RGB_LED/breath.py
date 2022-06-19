@@ -29,16 +29,15 @@ while True:
             b += 1
         else:
             dir = 1
+    elif b > 0:
+        b -= 1
+    elif g > 0:
+        g -= 1
+    elif r > 0:
+        r -= 1
     else:
-        if b > 0:
-            b -= 1
-        elif g > 0:
-            g -= 1
-        elif r > 0:
-            r -= 1
-        else:
-            dir = 0
-        
+        dir = 0
+
     for i in range(led_num):
         led.set_RGB(i, r, g, b)
     time.sleep_ms(1)

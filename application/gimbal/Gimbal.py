@@ -69,7 +69,7 @@ class PID:
         delta_time = float(dt) / float(1000)
         output += error * self._kp
         if abs(self._kd) > 0 and dt > 0:
-            if self._last_derivative == None:
+            if self._last_derivative is None:
                 derivative = 0
                 self._last_derivative = 0
             else:
@@ -169,8 +169,7 @@ if __name__ == "__main__":
         
         def get_target_err(self):
             img = sensor.snapshot()
-            code = kpu.run_yolo2(self.task_fd, img)
-            if code:
+            if code := kpu.run_yolo2(self.task_fd, img):
                 max_area = 0
                 max_i = 0
                 for i, j in enumerate(code):
@@ -178,7 +177,7 @@ if __name__ == "__main__":
                     if a > max_area:
                         max_i = i
                         max_area = a
-                
+
                 img = img.draw_rectangle(code[max_i].rect())
                 self.pitch = (code[max_i].y() + code[max_i].h() / 2)/240*self.out_range*2 - self.out_range
                 self.roll = (code[max_i].x() + code[max_i].w() / 2)/320*self.out_range*2 - self.out_range

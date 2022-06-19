@@ -7,7 +7,7 @@ from machine import I2C
 
 config_touchscreen_support = True
 board_m1n = False
-   
+
 i2c = I2C(I2C.I2C0, freq=400000, scl=30, sda=31)
 if not board_m1n:
 	lcd.init()
@@ -25,12 +25,8 @@ disp_drv = lv.disp_drv_t()
 lv.disp_drv_init(disp_drv)
 disp_drv.buffer = disp_buf1
 disp_drv.flush_cb = lv_h.flush
-if board_m1n:
-    disp_drv.hor_res = 240
-    disp_drv.ver_res = 240
-else:
-    disp_drv.hor_res = 320
-    disp_drv.ver_res = 240
+disp_drv.hor_res = 240 if board_m1n else 320
+disp_drv.ver_res = 240
 lv.disp_drv_register(disp_drv)
 
 if config_touchscreen_support:

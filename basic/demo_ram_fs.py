@@ -27,14 +27,11 @@ vfs.mkfs(vfs)
 uos.mount(vfs,'/ramdisk')
 
 text_str = "hello maixpy"
-f = open("/ramdisk/test.txt", "w")
-print("write:", text_str)
-f.write(text_str)
-f.close()
-
-f = open("/ramdisk/test.txt", "r")
-text = f.read()
-print("read:",text)
-f.close()
+with open("/ramdisk/test.txt", "w") as f:
+    print("write:", text_str)
+    f.write(text_str)
+with open("/ramdisk/test.txt", "r") as f:
+    text = f.read()
+    print("read:",text)
 
 

@@ -61,7 +61,7 @@ class UartTrans:
         try:
             del self.orders[hcmd]
         except:
-            print("unreg order {} failed".format(cmd))
+            print(f"unreg order {cmd} failed")
         try:
             del self.args[hcmd]
         except:
@@ -75,7 +75,7 @@ class UartTrans:
         end = 0xaaff
         data = bytearray(data)
         crc = self.crc16(data)
-        fmt = '>HBH'+str(len(data))+'sHH'
+        fmt = f'>HBH{len(data)}sHH'
         is_cmd = 1 if cmd else 0
         data = ustruct.pack(fmt, head, is_cmd, len(data), data, crc, end)
         return data
@@ -90,9 +90,9 @@ class UartTrans:
         for i in range(ra):
             try:
                 (head, is_cmd, len) = ustruct.unpack('>HBH', data[i:i+5])
-                if(head == 0xddff):  # check head
+                if (head == 0xddff):  # check head
                     try:
-                        fmt = '>'+str(len)+'sHH'
+                        fmt = f'>{str(len)}sHH'
                         (s, crc, end) = ustruct.unpack(
                             fmt, data[i+5:])
                         if s != None:
@@ -109,10 +109,8 @@ class UartTrans:
         return ret
 
     def read(self):
-        read_data = self.uart.read()
-        if read_data:
-            udatas = self.unpack_data(read_data, len(read_data))
-            return udatas
+        if read_data := self.uart.read():
+            return self.unpack_data(read_data, len(read_data))
     
     def write(self, s, is_cmd = 0):
         s = self.pack_data(s, is_cmd)
@@ -141,30 +139,29 @@ class UartTrans:
             try:
                 t = ustruct.unpack('>s', b[i:i+1]) # type
                 t = t[0].decode('utf-8')
-                fmt = '>' + t
+                fmt = f'>{t}'
                 try:
                     num = ustruct.unpack(fmt, b[i+1:])
                     ret.append(num[0])
                     i = i + 1 + ustruct.calcsize(str(t))
                 except: 
-                    i = i + 1
+                    i += 1
             except:
-                i = i + 1
+                i += 1
         return ret
 
     # fl: uint8_t(B)，int8_t(b), uint16_t(H), int16_t(h), uint32_t(I), int32_t(i), double(d), str(s)
     def pack_num(self, n, fl):
-        return  ustruct.pack(">s"+fl,fl,n)
+        return ustruct.pack(f">s{fl}", fl, n)
 
     # read data, parse to cmd and execute
     def parse(self, udatas):
         ret = []
         if udatas:
             for udata in udatas:
-                is_cmd  = udata[0]
-                if udata[0]: # cmd
+                if is_cmd := udata[0]:
                     self.exec_cmd(udata[1])
-                else: # data
+                else:
                     nums = self.bytes_to_nums(udata[1])
                     if len(nums) > 0:
                         ret.append(nums) # is nums

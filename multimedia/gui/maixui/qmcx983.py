@@ -36,9 +36,9 @@ class QMCX983:
         chip = self.i2c.readfrom_mem(self.address, 0x0d, 1)
         #print("chip id: " + str(chip))
         print(hex(chip[0]))
-        if 0x31 == chip[0]:
+        if chip[0] == 0x31:
             self.mag_chip_id = QMC6983_E1
-        elif 0x32 == chip[0]:
+        elif chip[0] == 0x32:
             self.i2c.writeto_mem(self.address, 0x2e, bytearray([0x01]))
             chip = self.i2c.readfrom_mem(self.address, 0x2f, 1)
             if ((chip[0]&0x04) >>2) != 0:
@@ -46,9 +46,9 @@ class QMCX983:
             else:
                 self.i2c.writeto_mem(self.address, 0x2e, bytearray([0x0f]))
                 chip = self.i2c.readfrom_mem(self.address, 0x2f, 1)
-                if (0x02 == ((chip[0]&0x3C)>>2)):
+                if (chip[0] & 0x3C) >> 2 == 0x02:
                     self.mag_chip_id = QMC7983_Vertical
-                if (0x03 == ((chip[0]&0x3C)>>2)):
+                if (chip[0] & 0x3C) >> 2 == 0x03:
                     self.mag_chip_id = QMC7983_Slope
         else:
             return
@@ -58,7 +58,7 @@ class QMCX983:
         if (self.mag_chip_id != QMC6983_A1_D1):
             self.i2c.writeto_mem(self.address, 0x29, bytearray([0x80]))
             self.i2c.writeto_mem(self.address, 0x0a, bytearray([0x0c]))
-        if (self.mag_chip_id == QMC6983_E1_Metal or self.mag_chip_id == QMC7983_Slope ):
+        if self.mag_chip_id in [QMC6983_E1_Metal, QMC7983_Slope]:
             self.i2c.writeto_mem(self.address, 0x1b, bytearray([0x80]))
         self.i2c.writeto_mem(self.address, 0x0b, bytearray([0x01]))
         self.i2c.writeto_mem(self.address, 0x09, bytearray([0x1d]))
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     i2c_bus = I2C(I2C.I2C0, freq=100*1000, scl=6, sda=7)
     i2c_devs_list = i2c_bus.scan()
-    print("I2C devices:" + str(i2c_devs_list))
+    print(f"I2C devices:{str(i2c_devs_list)}")
 
     bme=QMCX983(i2c=i2c_bus)
     lcd.init()

@@ -4,13 +4,13 @@ class lan:
 
   nic = None
 
-  def reset(spi1, cs, force=False, reply=5):
+  def reset(self, cs, force=False, reply=5):
     if force == False and __class__.isconnected():
         return True
     try:
       #  create wiznet5k nic
-      __class__.nic = network.WIZNET5K(spi=spi1, cs=cs)
-      # time.sleep_ms(500) # wait at ready to connect
+      __class__.nic = network.WIZNET5K(spi=self, cs=cs)
+        # time.sleep_ms(500) # wait at ready to connect
     except Exception as e:
         print(e)
         return False
@@ -21,9 +21,7 @@ class lan:
         return __class__.nic.ifconfig()
 
   def isconnected():
-    if __class__.nic != None:
-        return __class__.nic.isconnected()
-    return False
+    return __class__.nic.isconnected() if __class__.nic != None else False
 
 if __name__ == '__main__':
 
@@ -52,7 +50,7 @@ if __name__ == '__main__':
       spi1 = SPI(4, mode=SPI.MODE_MASTER, baudrate=600 * 1000,
                  polarity=0, phase=0, bits=8, firstbit=SPI.MSB, sck=WIZNET5K_SPI_SCK, mosi=WIZNET5K_SPI_MOSI, miso=WIZNET5K_SPI_MISO)
 
-      for i in range(5):
+      for _ in range(5):
         try:
           lan.reset(spi1, WIZNET5K_SPI_CS)
           print('try connect lan...')

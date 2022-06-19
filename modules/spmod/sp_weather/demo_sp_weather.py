@@ -44,9 +44,9 @@ class SPWEATHER:
         chip = self.i2c.readfrom_mem(self.qmc_address, 0x0d, 1)
         #print("chip id: " + str(chip))
         print("chip id:", hex(chip[0]))
-        if 0x31 == chip[0]:
+        if chip[0] == 0x31:
             self.mag_chip_id = QMC6983_E1
-        elif 0x32 == chip[0]:
+        elif chip[0] == 0x32:
             self.i2c.writeto_mem(self.qmc_address, 0x2e, bytearray([0x01]))
             chip = self.i2c.readfrom_mem(self.qmc_address, 0x2f, 1)
             if ((chip[0]&0x04) >>2) != 0:
@@ -54,9 +54,9 @@ class SPWEATHER:
             else:
                 self.i2c.writeto_mem(self.qmc_address, 0x2e, bytearray([0x0f]))
                 chip = self.i2c.readfrom_mem(self.qmc_address, 0x2f, 1)
-                if (0x02 == ((chip[0]&0x3C)>>2)):
+                if (chip[0] & 0x3C) >> 2 == 0x02:
                     self.mag_chip_id = QMC7983_Vertical
-                if (0x03 == ((chip[0]&0x3C)>>2)):
+                if (chip[0] & 0x3C) >> 2 == 0x03:
                     self.mag_chip_id = QMC7983_Slope
         else:
             return
@@ -66,7 +66,7 @@ class SPWEATHER:
         if (self.mag_chip_id != QMC6983_A1_D1):
             self.i2c.writeto_mem(self.qmc_address, 0x29, bytearray([0x80]))
             self.i2c.writeto_mem(self.qmc_address, 0x0a, bytearray([0x0c]))
-        if (self.mag_chip_id == QMC6983_E1_Metal or self.mag_chip_id == QMC7983_Slope ):
+        if self.mag_chip_id in [QMC6983_E1_Metal, QMC7983_Slope]:
             self.i2c.writeto_mem(self.qmc_address, 0x1b, bytearray([0x80]))
         self.i2c.writeto_mem(self.qmc_address, 0x0b, bytearray([0x01]))
         self.i2c.writeto_mem(self.qmc_address, 0x09, bytearray([0x1d]))
@@ -201,8 +201,8 @@ class SPWEATHER:
                             (((h * self.dig_H3) >> 11) + 32768)) >> 10) +
                           2097152) * self.dig_H2 + 8192) >> 14))
         h = h - (((((h >> 15) * (h >> 15)) >> 7) * self.dig_H1) >> 4)
-        h = 0 if h < 0 else h
-        h = 419430400 if h > 419430400 else h
+        h = max(h, 0)
+        h = min(h, 419430400)
         humidity = h >> 12
 
         if result:
@@ -225,8 +225,11 @@ class SPWEATHER:
 
         hi = h // 1024
         hd = h * 100 // 1024 - hi * 100
-        return ("{}C".format(t / 100), "{}.{:02d}hPa".format(pi, pd),
-                "{}.{:02d}%".format(hi, hd))
+        return (
+            f"{t / 100}C",
+            "{}.{:02d}hPa".format(pi, pd),
+            "{}.{:02d}%".format(hi, hd),
+        )
     ################## BME280 End ##################
 
 
@@ -242,12 +245,12 @@ if __name__ == "__main__":
     WEATHER_I2C_SCL = 30
     WEATHER_I2C_SDA = 31
     ##################################
-    
+
     i2c_bus = I2C(WEATHER_I2C_NUM, freq=WEATHER_I2C_FREQ_KHZ*1000, 
     scl=WEATHER_I2C_SCL, sda=WEATHER_I2C_SDA, gscl = fm.fpioa.GPIOHS1,
     gsda = fm.fpioa.GPIOHS2)
     i2c_devs_list = i2c_bus.scan()
-    print("I2C devices:" + str(i2c_devs_list))
+    print(f"I2C devices:{str(i2c_devs_list)}")
 
     weather=SPWEATHER(i2c=i2c_bus) # create sp_weather
 

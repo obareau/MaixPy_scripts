@@ -30,19 +30,19 @@ state = 0
 try:
   nes.init(nes.INPUT)
   nes.load("sd/game/mario.nes")
-  for i in range(20000):
+  for _ in range(20000):
     nes.loop()
-  for i in range(500):
+  for _ in range(500):
     nes.loop()
     nes.input(8, 0, 0)
     nes.loop()
     nes.input(0, 0, 0)
   while True:
     tmp = i2c.readfrom(66, 1)
-    for i in range(10):
+    for _ in range(10):
       nes.loop()
     nes.input(tmp[0], 0, 0)
-    for i in range(10):
+    for _ in range(10):
       nes.loop()
 finally:
   nes.free()

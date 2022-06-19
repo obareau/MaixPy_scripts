@@ -67,10 +67,7 @@ while 1:
             v = v/100.0
             if auto_color:
                 if v < min_temp:
-                    if v < min_temp_limit:
-                        min_temp = min_temp_limit
-                    else:
-                        min_temp = v
+                    min_temp = max(v, min_temp_limit)
                 if v > max_temp:
                     if v > max_temp_limit:
                         min_temp = max_temp_limit

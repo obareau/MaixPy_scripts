@@ -16,7 +16,10 @@ def main(model_addr=0x300000, lcd_rotation=0, sensor_hmirror=False, sensor_vflip
     try:
         sensor.reset()
     except Exception as e:
-        raise Exception("sensor reset fail, please check hardware connection, or hardware damaged! err: {}".format(e))
+        raise Exception(
+            f"sensor reset fail, please check hardware connection, or hardware damaged! err: {e}"
+        )
+
     sensor.set_pixformat(sensor.RGB565)
     sensor.set_framesize(sensor.QVGA)
     sensor.set_hmirror(sensor_hmirror)
@@ -45,7 +48,7 @@ def main(model_addr=0x300000, lcd_rotation=0, sensor_hmirror=False, sensor_vflip
     except Exception as e:
         raise e
     finally:
-        if not task is None:
+        if task is not None:
             kpu.deinit(task)
 
 

@@ -53,7 +53,7 @@ class DS18X20:
                 if t & 0x8000:  # sign bit set
                     t = -((t ^ 0xFFFF) + 1)
                 temp.append(t / 16)
-        if len(temp) < 1:
+        if not temp:
             return -1
         if len(temp) < 2:
             return temp[0]

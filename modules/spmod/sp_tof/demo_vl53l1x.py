@@ -142,7 +142,7 @@ class VL53L1X:
 
     def read_model_id(self):
         id = self.readReg16Bit(0x010F)
-        print("id:" + str(id))
+        print(f"id:{str(id)}")
         return id
 
     def reset(self):
@@ -211,5 +211,8 @@ if __name__ == "__main__":
         utime.sleep_ms(100)
 
         img = sensor.snapshot()
-        img.draw_string(10, lcd.height() - 30, "range: "+ str(mm/10) + " cm", lcd.RED, scale=2)
+        img.draw_string(
+            10, lcd.height() - 30, f"range: {str(mm/10)} cm", lcd.RED, scale=2
+        )
+
         lcd.display(img)

@@ -8,12 +8,11 @@ import time
 name = "MAIXCUBE"
 
 def set_name(uart, name):
-    for i in range(200):
+    for _ in range(200):
         # change the name to MAIXCUBE
-        uart.write("AT+NAME{}\r\n".format(name))
+        uart.write(f"AT+NAME{name}\r\n")
         time.sleep_ms(200)
-        read_data = uart.read()
-        if read_data:
+        if read_data := uart.read():
             read_str = read_data.decode('utf-8')
             count = read_str.count("OK")
             if count != 0:
@@ -35,8 +34,7 @@ if __name__ == "__main__":
     set_name(uart, name)
     print("wait data: ")
     while True:
-        read_data = uart.read()
-        if read_data:
+        if read_data := uart.read():
             print("recv:", read_data)
             uart.write(read_data)  # send data back
             print("wait data: ")

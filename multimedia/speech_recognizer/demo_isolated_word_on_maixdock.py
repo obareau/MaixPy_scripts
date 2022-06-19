@@ -91,7 +91,7 @@ while True:
     if sr.Done == sr.recognize():
         res = sr.result()
         if res != None:
-            print(str(res[0]))
+            print(res[0])
             if res[0] == 0:
                 img.draw_rectangle((0, 0, 320, 240), fill=True, color=(255, 255, 255))
                 img.draw_string(150,100, "A", color=(255, 0, 0), scale=10, mono_space=0)

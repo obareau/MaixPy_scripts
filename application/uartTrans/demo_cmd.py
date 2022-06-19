@@ -6,8 +6,8 @@ import ustruct
 from uart_protocol import UartTrans
 
 def cus_cmd(uart, str):
-    print("execute cus cmd {}".format(str))
-    uart.write("execute cus cmd {}".format(str))
+    print(f"execute cus cmd {str}")
+    uart.write(f"execute cus cmd {str}")
 
 # read cmd from uart and execute cmd fun
 if __name__ == "__main__":
@@ -21,14 +21,13 @@ if __name__ == "__main__":
     # pack cus cmd and send 
     print("send the packed 'cus' cmd to uart1")
     uart_t.write('cus', 1)
-    
+
     # register cus cmd
     uart_t.reg_cmd("cus", cus_cmd, uart1, "cus1") 
 
     # start to parse the receive cmd
     while True:
-        udatas = uart_t.read()
-        if udatas:
+        if udatas := uart_t.read():
             print(udatas)
             uart_t.parse(udatas)
         time.sleep_ms(100)

@@ -21,11 +21,11 @@ sensor.set_framesize(sensor.QVGA)
 sensor.skip_frames(time = 2000)
 clock = time.clock()
 
-while(repl_unlock.value() != 0):
+while (repl_unlock.value() != 0):
     clock.tick()
     img = sensor.snapshot()
     if key_shot.value() == 0:
-        path = "/flash/camera-" + str(num) + ".jpg"
+        path = f"/flash/camera-{str(num)}.jpg"
         lcd.draw_string(80,40,"Saved :)",lcd.RED,lcd.WHITE)
         time.sleep(1)
         img.save(path)

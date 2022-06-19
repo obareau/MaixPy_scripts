@@ -1,6 +1,6 @@
 import sys
 
-for i in range(0, 2):
+for _ in range(2):
     print("hello maixpy")
     print("hello ", end="maixpy\n")
 

@@ -67,7 +67,7 @@ class ADXL345:
     #    True           : result is returned in gs
     def getAxes(self, gforce = False):
         bytes = self.bus.readfrom_mem(self.address, AXES_DATA, 6)
-        
+
         x = bytes[0] | (bytes[1] << 8)
         if(x & (1 << 16 - 1)):
             x = x - (1<<16)

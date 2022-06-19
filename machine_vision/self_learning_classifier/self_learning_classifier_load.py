@@ -42,10 +42,19 @@ while 1:
         print("{:.2f}".format(min_dist))
     except Exception as e:
         print("predict err:", e)
-    if res_index >= 0 and min_dist < THRESHOLD :
+    if res_index >= 0 and min_dist < THRESHOLD:
         print("predict result:", class_names[res_index])
         img = draw_string(img, 2, 2, class_names[res_index], color=lcd.WHITE,scale=2, bg=lcd.RED)
     else:
         print("unknown, maybe:", class_names[res_index])
-        img = draw_string(img, 2, 2, 'maybe {}'.format(class_names[res_index]), color=lcd.WHITE,scale=2, bg=lcd.RED)
+        img = draw_string(
+            img,
+            2,
+            2,
+            f'maybe {class_names[res_index]}',
+            color=lcd.WHITE,
+            scale=2,
+            bg=lcd.RED,
+        )
+
     lcd.display(img)

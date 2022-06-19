@@ -18,15 +18,15 @@ class TouchLow:
   i2c3 = None
   addr = 0x0
 
-  def config(i2c3, addr=FT6X36_ADDR):
-    TouchLow.i2c3 = i2c3
+  def config(self, addr=FT6X36_ADDR):
+    TouchLow.i2c3 = self
     TouchLow.addr = addr
 
-  def write_reg(reg_addr, buf):
-    TouchLow.i2c3.writeto_mem(TouchLow.addr, reg_addr, buf, mem_size=8)
+  def write_reg(self, buf):
+    TouchLow.i2c3.writeto_mem(TouchLow.addr, self, buf, mem_size=8)
 
-  def read_reg(reg_addr, buf_len):
-    return TouchLow.i2c3.readfrom_mem(TouchLow.addr, reg_addr, buf_len, mem_size=8)
+  def read_reg(self, buf_len):
+    return TouchLow.i2c3.readfrom_mem(TouchLow.addr, self, buf_len, mem_size=8)
 
   def config_ft6x36():
     TouchLow.write_reg(FT_DEVIDE_MODE, 0); # 进入正常操作模式
@@ -68,9 +68,9 @@ class Touch:
       x, y = tmp
 
       if self.invert_y:
-          y = self.height - y
-          if x < 0: x = 0
-          if y < 0: y = 0
+        y = self.height - y
+        x = max(x, 0)
+        y = max(y, 0)
 
       self.last_time = time.ticks_ms()
       if self.state != Touch.press:

@@ -3,7 +3,10 @@ import sensor, lcd
 try:
     sensor.reset()
 except Exception as e:
-    raise Exception("sensor reset fail, please check hardware connection, or hardware damaged! err: {}".format(e))
+    raise Exception(
+        f"sensor reset fail, please check hardware connection, or hardware damaged! err: {e}"
+    )
+
 sensor.set_pixformat(sensor.RGB565)
 sensor.set_framesize(sensor.QVGA)
 # sensor.set_hmirror(1) # cube & amigo
