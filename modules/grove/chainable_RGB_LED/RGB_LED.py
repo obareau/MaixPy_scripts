@@ -19,16 +19,14 @@ class RGB_LED:
         self.data = GPIO(GPIO.GPIOHS0+data_gpiohs-fm.fpioa.GPIOHS0, GPIO.OUT)
         self.clk.value(1)
         self.data.value(0)
-        self.status = []
-        for i in range(number_leds):
-            self.status.append([0,0,0])
+        self.status = [[0,0,0] for _ in range(number_leds)]
 
     def check_RGB(self, value):
-        if not value in range(0,256):
+        if value not in range(256):
             raise ValueError("value: [0, 255]")
     
     def check_HSB(self, value):
-        if not value in range(0.0,1.0):
+        if value not in range(0.0, 1.0):
             raise ValueError("value: [0, 1]")
 
     # red, green, blue
@@ -69,7 +67,7 @@ class RGB_LED:
         self.set_RGB(led, r, g, b)
 
     def send_byte(self, data):
-        for i in range(8):
+        for _ in range(8):
             if data & 0x80:
                 self.data.value(1)
             else:

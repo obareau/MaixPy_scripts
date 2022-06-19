@@ -42,12 +42,14 @@ class MainWindow(QMainWindow):
     def send_thread(self):
         tim = time.time()
         while True:
-            if self.send_flag:
-                if len(self.key) != 0:
-                    if time.time() -tim >= self.interval:
-                        for i in self.key:
-                            self.com.write(i)
-                        tim = time.time()
+            if (
+                self.send_flag
+                and len(self.key) != 0
+                and time.time() - tim >= self.interval
+            ):
+                for i in self.key:
+                    self.com.write(i)
+                tim = time.time()
             time.sleep(0.01)
             # ret = self.com.read()
             # print(ret.decode(), end = "")
@@ -70,11 +72,11 @@ class MainWindow(QMainWindow):
             self.send_flag = False
             self.com.write(b"m")
             self.send_flag = False
-        elif event.key() == Qt.Key_Return or event.key()==Qt.Key_Enter:
+        elif event.key() in [Qt.Key_Return, Qt.Key_Enter]:
             self.send_flag = False
             self.com.write(b"m")
             self.send_flag = False
-        elif event.key() == Qt.Key_N or event.key() == 92:
+        elif event.key() in [Qt.Key_N, 92]:
             self.send_flag = False
             self.com.write(b"n")
             self.send_flag = False
@@ -86,16 +88,16 @@ class MainWindow(QMainWindow):
             self.send_flag = False
             self.com.write(b"=")
             self.send_flag = False
-        elif event.key() == Qt.Key_W or event.key() == Qt.Key_Up:
+        elif event.key() in [Qt.Key_W, Qt.Key_Up]:
             self.send_flag = True
             self.key.append(b"w")
-        elif event.key() == Qt.Key_A or event.key() == Qt.Key_Left:
+        elif event.key() in [Qt.Key_A, Qt.Key_Left]:
             self.send_flag = True
             self.key.append(b"a")
-        elif event.key() == Qt.Key_S or event.key() == Qt.Key_Down:
+        elif event.key() in [Qt.Key_S, Qt.Key_Down]:
             self.send_flag = True
             self.key.append(b"s")
-        elif event.key() == Qt.Key_D or event.key() == Qt.Key_Right:
+        elif event.key() in [Qt.Key_D, Qt.Key_Right]:
             self.send_flag = True
             self.key.append(b"d")
         elif event.key() == Qt.Key_J:

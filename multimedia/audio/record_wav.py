@@ -33,11 +33,11 @@ frame_cnt = record_time*sample_rate//sample_points
 
 for i in range(frame_cnt):
     tmp = rx.record(sample_points*wav_ch)
-    if len(queue) > 0:
+    if queue:
         ret = recorder.record(queue[0])
         queue.pop(0)
     rx.wait_record()
     queue.append(tmp)
-    print(str(i) + ":" + str(time.ticks()))
+    print(f"{str(i)}:{str(time.ticks())}")
 
 recorder.finish()

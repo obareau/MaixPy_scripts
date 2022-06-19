@@ -11,10 +11,9 @@ sensor.run(1)
 green_threshold   = (0,   80,  -70,   -10,   -0,   30)
 while True:
     img=sensor.snapshot()
-    blobs = img.find_blobs([green_threshold])
-    if blobs:    
+    if blobs := img.find_blobs([green_threshold]):
         for b in blobs:
-            tmp=img.draw_rectangle(b[0:4]) 
-            tmp=img.draw_cross(b[5], b[6]) 
+            tmp = img.draw_rectangle(b[:4])
+            tmp=img.draw_cross(b[5], b[6])
             c=img.get_pixel(b[5], b[6])
     lcd.display(img)

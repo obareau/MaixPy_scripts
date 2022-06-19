@@ -107,9 +107,9 @@ class SPEINK:
         img1 = image.Image()  # handle image
         img1 = img1.resize(self.width, self.height)
 
-        if(img_bw == None):
+        if img_bw is None:
             self._command(0x10)  # write "B/W" data to SRAM. 0x00:black
-            for i in range(10000):
+            for _ in range(10000):
                 self._data(0xff)
         else:
             img1.draw_image(img_bw, 0, 0)
@@ -145,7 +145,7 @@ class SPEINK:
         self.wait_until_idle()
 
     def wait_until_idle(self):
-        for i in range(10):
+        for _ in range(10):
             sleep_ms(100)
             if self.busy.value() != BUSY:
                 return True

@@ -158,10 +158,7 @@ class Upgrade():
         time.sleep_ms(200)
         read = self.uart.read()
         print(read)
-        if b"version" in read:
-            return read.split(b"\r\n")[1:-2]
-        else:
-            return None
+        return read.split(b"\r\n")[1:-2] if b"version" in read else None
 
     def wait_boot_up(self):
         print("[wait boot up]")

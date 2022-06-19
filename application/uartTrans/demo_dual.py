@@ -6,8 +6,8 @@ import ustruct
 from uart_protocol import UartTrans
 
 def cus_cmd(uart, str):
-    print("execute cus cmd {}".format(str))
-    uart.write("execute cus cmd {}".format(str))
+    print(f"execute cus cmd {str}")
+    uart.write(f"execute cus cmd {str}")
 
 # read cmd from uart and execute cmd fun
 if __name__ == "__main__":

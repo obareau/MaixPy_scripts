@@ -126,40 +126,27 @@ class DHT11:
                 if current == 0:
                     # ok, we got the initial pull down
                     state = STATE_INIT_PULL_UP
-                    continue
-                else:
-                    continue
+                continue
             if state == STATE_INIT_PULL_UP:
                 if current == 1:
                     # ok, we got the initial pull up
                     state = STATE_DATA_FIRST_PULL_DOWN
-                    continue
-                else:
-                    continue
+                continue
             if state == STATE_DATA_FIRST_PULL_DOWN:
                 if current == 0:
                     # we have the initial pull down, the next will be the data pull up
                     state = STATE_DATA_PULL_UP
-                    continue
-                else:
-                    continue
+                continue
             if state == STATE_DATA_PULL_UP:
                 if current == 1:
                     # data pulled up, the length of this pull up will determine whether it is 0 or 1
                     current_length = 0
                     state = STATE_DATA_PULL_DOWN
-                    continue
-                else:
-                    continue
-            if state == STATE_DATA_PULL_DOWN:
-                if current == 0:
-                    # pulled down, we store the length of the previous pull up period
-                    lengths.append(current_length)
-                    state = STATE_DATA_PULL_UP
-                    continue
-                else:
-                    continue
-
+                continue
+            if state == STATE_DATA_PULL_DOWN and current == 0:
+                # pulled down, we store the length of the previous pull up period
+                lengths.append(current_length)
+                state = STATE_DATA_PULL_UP
         return lengths
 
     def __calculate_bits(self, pull_up_lengths):
@@ -167,7 +154,7 @@ class DHT11:
         shortest_pull_up = 1000
         longest_pull_up = 0
 
-        for i in range(0, len(pull_up_lengths)):
+        for i in range(len(pull_up_lengths)):
             length = pull_up_lengths[i]
             if length < shortest_pull_up:
                 shortest_pull_up = length
@@ -178,7 +165,7 @@ class DHT11:
         halfway = shortest_pull_up + (longest_pull_up - shortest_pull_up) / 2
         bits = []
 
-        for i in range(0, len(pull_up_lengths)):
+        for i in range(len(pull_up_lengths)):
             bit = False
             if pull_up_lengths[i] > halfway:
                 bit = True
@@ -190,12 +177,9 @@ class DHT11:
         the_bytes = []
         byte = 0
 
-        for i in range(0, len(bits)):
+        for i in range(len(bits)):
             byte = byte << 1
-            if (bits[i]):
-                byte = byte | 1
-            else:
-                byte = byte | 0
+            byte = byte | 1 if bits[i] else byte | 0
             if ((i + 1) % 8 == 0):
                 the_bytes.append(byte)
                 byte = 0

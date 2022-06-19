@@ -82,10 +82,7 @@ class RWBit:
         self.bit_mask = 1 << (bit % 8)  # the bitmask *within* the byte!
         self.buffer = bytearray(1 + register_width)
         self.buffer[0] = register_address
-        if lsb_first:
-            self.byte = bit // 8 + 1  # the byte number within the buffer
-        else:
-            self.byte = register_width - (bit // 8)  # the byte number within the buffer
+        self.byte = bit // 8 + 1 if lsb_first else register_width - (bit // 8)
 
     def __get__(self, obj, objtype=None):
         with obj.i2c_device as i2c:
@@ -303,15 +300,6 @@ class I2CDevice:
         in_buffer[in_start:in_end] = tmp
         # print('write_then_readinto', in_buffer)
         return
-        self.i2c.writeto_then_readfrom(
-            self.device_address,
-            out_buffer,
-            in_buffer,
-            out_start=out_start,
-            out_end=out_end,
-            in_start=in_start,
-            in_end=in_end,
-        )
 
     # pylint: enable-msg=too-many-arguments
 
@@ -553,15 +541,15 @@ class MSA301:  # pylint: disable=too-many-instance-attributes
 
         current_range = self.range
         scale = 1.0
-        if current_range == 3:
-            scale = 512.0
-        if current_range == 2:
-            scale = 1024.0
-        if current_range == 1:
-            scale = 2048.0
         if current_range == 0:
             scale = 4096.0
 
+        elif current_range == 1:
+            scale = 2048.0
+        elif current_range == 2:
+            scale = 1024.0
+        elif current_range == 3:
+            scale = 512.0
         # shift down to the actual 14 bits and scale based on the range
         x_acc = ((x >> 2) / scale) * _STANDARD_GRAVITY
         y_acc = ((y >> 2) / scale) * _STANDARD_GRAVITY

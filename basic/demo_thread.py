@@ -10,7 +10,7 @@ import time
 
 def func(name):
     while 1:
-        print("hello {}".format(name))
+        print(f"hello {name}")
         time.sleep(1)
 
 _thread.start_new_thread(func,("1",))

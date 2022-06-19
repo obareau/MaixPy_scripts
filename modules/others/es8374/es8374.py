@@ -200,11 +200,7 @@ class ES8374:
     _ES8374_I2CADDR_DEFAULT = 0x10
 
     def __init__(self, i2c_bus=None, i2c_addr=_ES8374_I2CADDR_DEFAULT):
-        if i2c_bus == None:
-            self.i2c_bus = I2C(I2C.I2C1, freq=100*1000) # , sda=31, scl=30
-        else:
-            self.i2c_bus = i2c_bus
-
+        self.i2c_bus = I2C(I2C.I2C1, freq=100*1000) if i2c_bus is None else i2c_bus
         self.i2c_addr = i2c_addr
 
         # dev_list = self.i2c_bus.scan()
@@ -271,7 +267,7 @@ class ES8374:
             self._writeReg(0x1c, reg)
             self._writeReg(0x1F, 0x00)# spk set
 
-        if ((mode == ES_MODULE._ES_MODULE_DAC) or (mode == ES_MODULE._ES_MODULE_ADC_DAC)):
+        if mode in [ES_MODULE._ES_MODULE_DAC, ES_MODULE._ES_MODULE_ADC_DAC]:
             self.setVoiceMute(True)
             reg = self._readReg(0x1a) # #disable lout
             reg |= 0x08
@@ -284,7 +280,7 @@ class ES8374:
             reg |= 0x20
             self._writeReg(0x15, reg)
 
-        if (mode == ES_MODULE._ES_MODULE_ADC or mode == ES_MODULE._ES_MODULE_ADC_DAC):
+        if mode in [ES_MODULE._ES_MODULE_ADC, ES_MODULE._ES_MODULE_ADC_DAC]:
             reg = self._readReg(0x10) # #power up adc and input
             reg |= 0xc0
             self._writeReg(0x10, reg)
@@ -305,9 +301,11 @@ class ES8374:
             self._writeReg(0x1D, 0x02) #  spk set
             self._writeReg(0x1F, 0x00) #  spk set
             self._writeReg(0x1E, 0xA0) #  spk on
-        if (mode == ES_MODULE._ES_MODULE_ADC
-            or mode == ES_MODULE._ES_MODULE_ADC_DAC
-            or mode == ES_MODULE._ES_MODULE_LINE):
+        if mode in [
+            ES_MODULE._ES_MODULE_ADC,
+            ES_MODULE._ES_MODULE_ADC_DAC,
+            ES_MODULE._ES_MODULE_LINE,
+        ]:
             reg = self._readReg(0x21) # power up adc and input
             reg &= 0x3f
             self._writeReg(0x21, reg)
@@ -315,9 +313,11 @@ class ES8374:
             reg &= 0x3f
             self._writeReg(0x10, reg)
 
-        if (mode == ES_MODULE._ES_MODULE_DAC
-            or mode == ES_MODULE._ES_MODULE_ADC_DAC
-            or mode == ES_MODULE._ES_MODULE_LINE):
+        if mode in [
+            ES_MODULE._ES_MODULE_DAC,
+            ES_MODULE._ES_MODULE_ADC_DAC,
+            ES_MODULE._ES_MODULE_LINE,
+        ]:
             reg = self._readReg(0x1a) # disable lout
             reg |= 0x08
             self._writeReg(0x1a, reg)
@@ -453,7 +453,7 @@ class ES8374:
             ES8374_I2S_CLOCK._MCLK_DIV_13 : 30, # 18
             ES8374_I2S_CLOCK._MCLK_DIV_14 : 31, # 19
         }
-        divratio = sclk_div_dir.get(cfg.sclk_div, None)
+        divratio = sclk_div_dir.get(cfg.sclk_div)
 
         reg |= divratio
         self._writeReg(0x0f, reg)
@@ -512,8 +512,8 @@ class ES8374:
             ES8374_I2S_CLOCK._LCLK_DIV_1496  : (1496 >>8),
             ES8374_I2S_CLOCK._LCLK_DIV_1500  : (1500 >>8),
         }
-        dacratio_l = lclk_div_dacratio_l_dir.get(cfg.lclk_div, None)
-        dacratio_h = lclk_div_dacratio_h_dir.get(cfg.lclk_div, None)
+        dacratio_l = lclk_div_dacratio_l_dir.get(cfg.lclk_div)
+        dacratio_h = lclk_div_dacratio_h_dir.get(cfg.lclk_div)
 
         self._writeReg(0x06, dacratio_h)# ADCFsMode,singel SPEED,RATIO=256
         self._writeReg(0x07, dacratio_l)# ADCFsMode,singel SPEED,RATIO=256
@@ -521,13 +521,13 @@ class ES8374:
     def configI2SFormat(self, mode, fmt):
         fmt_tmp = ((fmt & 0xf0) >> 4)
         fmt_i2s =  fmt & 0x0f
-        if (mode == ES_MODULE._ES_MODULE_ADC or mode == ES_MODULE._ES_MODULE_ADC_DAC):
+        if mode in [ES_MODULE._ES_MODULE_ADC, ES_MODULE._ES_MODULE_ADC_DAC]:
             reg = self._readReg(0x10)
             reg &= 0xfc
             self._writeReg(0x10, (reg|fmt_i2s))
             self.setBitsPerSample(mode, fmt_tmp)
 
-        if (mode == ES_MODULE._ES_MODULE_DAC or mode == ES_MODULE._ES_MODULE_ADC_DAC):
+        if mode in [ES_MODULE._ES_MODULE_DAC, ES_MODULE._ES_MODULE_ADC_DAC]:
             reg = self._readReg(0x11)
             reg &= 0xfc
             self._writeReg(0x11, (reg|fmt_i2s))
@@ -537,30 +537,28 @@ class ES8374:
     def setBitsPerSample(self, mode, bit_per_smaple):
         bits = bit_per_smaple & 0x0f
 
-        if (mode == ES_MODULE._ES_MODULE_ADC or mode == ES_MODULE._ES_MODULE_ADC_DAC):
+        if mode in [ES_MODULE._ES_MODULE_ADC, ES_MODULE._ES_MODULE_ADC_DAC]:
             reg = self._readReg(0x10)
             reg &= 0xe3
             self._writeReg(0x10, (reg| (bits << 2)))
 
-        if (mode == ES_MODULE._ES_MODULE_DAC or mode == ES_MODULE._ES_MODULE_ADC_DAC):
+        if mode in [ES_MODULE._ES_MODULE_DAC, ES_MODULE._ES_MODULE_ADC_DAC]:
             reg = self._readReg(0x11)
             reg &= 0xe3
             self._writeReg(0x11, (reg| (bits << 2)))
 
     # set ADC DAC Volume
     def setADCDACVolume(self, mode, volume, dot):
-        if ((volume < -96) or (volume>0)):
-            # print("Warning: volume < -96! or > 0!")
-            if (volume < -96):
-                volume = -96
-            else:
-                volume = 0
+        if volume < -96:
+            volume = -96
+        elif volume>0:
+            volume = 0
 
         dot = 1 if (dot >= 5) else 0
         volume = (-volume << 1) + dot
-        if (mode == ES_MODULE._ES_MODULE_ADC or mode == ES_MODULE._ES_MODULE_ADC_DAC):
+        if mode in [ES_MODULE._ES_MODULE_ADC, ES_MODULE._ES_MODULE_ADC_DAC]:
             self._writeReg(0x25, volume)
-        if (mode == ES_MODULE._ES_MODULE_DAC or mode == ES_MODULE._ES_MODULE_ADC_DAC):
+        if mode in [ES_MODULE._ES_MODULE_DAC, ES_MODULE._ES_MODULE_ADC_DAC]:
             self._writeReg(0x38, volume)
 
     def configDACOutput(self, output):
@@ -614,14 +612,14 @@ class ES8374:
     def setVoiceMute(self, enable):
         reg = self._readReg(0x36)
         reg &= 0xdf
-        reg = ( reg | (enable << 5))
+        reg |= enable << 5
         # print("SetVoiceMute[%s]:" % str(reg) )
         self._writeReg(0x36, reg)
 
     # get voice mute
     def getVoiceMute(self):
         value = self._readReg(0x36)
-        return True if (value & 0x40) else False
+        return bool(value & 0x40)
 
     # set mic gain
     def setMICGain(self, gain):
@@ -631,8 +629,6 @@ class ES8374:
             reg = (gain_n | (gain_n<<4))
             # print("22H:0x%X" % reg)
             self._writeReg(0x22, reg) # MIC PGA
-        else:
-            pass
             # print("invalid micropython gain")
 
     def setD2sePga(self, gain):
@@ -641,8 +637,6 @@ class ES8374:
             reg &= 0xfb
             reg |= gain << 2
             self._writeReg(0x21, reg) # MIC PGA
-        else:
-            pass
             # print("invalid microphone gain!")
 
     def codecCtrlSate(self, mode, ctrl_state):
@@ -652,8 +646,8 @@ class ES8374:
             ES8374_CONFIG._ES8374_MODE_DECODE: ES_MODULE._ES_MODULE_DAC,
             ES8374_CONFIG._ES8374_MODE_BOTH: ES_MODULE._ES_MODULE_ADC_DAC,
         }
-        es_mode = mode_list.get(mode, None)
-        if (es_mode == None):
+        es_mode = mode_list.get(mode)
+        if es_mode is None:
             es_mode = ES_MODULE._ES_MODULE_DAC
             # print("Codec mode not support, default is decode mode\r\n")
 
@@ -670,6 +664,7 @@ class ES8374:
 2.测试 ES8374 是否初始化成功
 3.测试 ES8374 是否配置正常
 -----------------------------'''
+
 
 if __name__ == "__main__":
 
@@ -696,7 +691,7 @@ if __name__ == "__main__":
     #i2c = I2C(I2C.I2C1, freq=100*1000) # , sda=31, scl=30
     #i2c = I2C(I2C.I2C3, freq=600*1000, sda=27, scl=24) # amigo
     i2c = I2C(I2C.I2C3, freq=600*1000, sda=31, scl=30, gscl=fm.fpioa.GPIOHS17, gsda=fm.fpioa.GPIOHS18) # cube
-    
+
     #fm.register(30,fm.fpioa.I2C1_SCLK, force=True)
     #fm.register(31,fm.fpioa.I2C1_SDA, force=True)
 
@@ -728,7 +723,7 @@ if __name__ == "__main__":
             #fm.register(18,fm.fpioa.I2S0_WS, force=True)
             #fm.register(35,fm.fpioa.I2S0_IN_D0, force=True)
             #fm.register(34,fm.fpioa.I2S0_OUT_D2, force=True)
-            
+
             # cube
             fm.register(19,fm.fpioa.I2S0_MCLK, force=True)
             fm.register(35,fm.fpioa.I2S0_SCLK, force=True)
@@ -740,14 +735,14 @@ if __name__ == "__main__":
 
             player = audio.Audio(path="/sd/record_4.wav", is_create=True, samplerate=22050)
             queue = []
-            for i in range(200):
-             tmp = i2s.record(1024)
-             if len(queue) > 0:
-                 print(time.ticks())
-                 ret = player.record(queue[0])
-                 queue.pop(0)
-             i2s.wait_record()
-             queue.append(tmp)
+            for _ in range(200):
+                tmp = i2s.record(1024)
+                if queue:
+                    print(time.ticks())
+                    ret = player.record(queue[0])
+                    queue.pop(0)
+                i2s.wait_record()
+                queue.append(tmp)
             player.finish()
 
             del i2s, player
@@ -772,7 +767,7 @@ if __name__ == "__main__":
             #fm.register(18,fm.fpioa.I2S0_WS, force=True)
             #fm.register(35,fm.fpioa.I2S0_IN_D0, force=True)
             #fm.register(34,fm.fpioa.I2S0_OUT_D2, force=True)
-            
+
             # cube
             fm.register(19,fm.fpioa.I2S0_MCLK, force=True)
             fm.register(35,fm.fpioa.I2S0_SCLK, force=True)
@@ -780,8 +775,7 @@ if __name__ == "__main__":
             fm.register(34,fm.fpioa.I2S0_IN_D0, force=True)
             fm.register(18,fm.fpioa.I2S0_OUT_D2, force=True)
 
-            for i in range(3):
-
+            for _ in range(3):
                 time.sleep_ms(10)
 
                 # init audio
@@ -796,37 +790,35 @@ if __name__ == "__main__":
                 # print('loop to play audio')
                 while True:
                     ret = player.play()
-                    if ret == None:
+                    if ret in [None, 0]:
                         # print("format error")
-                        break
-                    elif ret == 0:
                         break
                 player.finish()
 
             del i2s, player
 
-            #img = image.Image(size=(240, 240))
-            #hist_width = 1 #changeable
-            #x_shift = 0
-            #for i in range(100):
-                #temp = i2s.record(1024)
-                #time.sleep_ms(10)
-                #fft_res = FFT.run(temp.to_bytes(), 512)
-                #fft_amp = FFT.amplitude(fft_res)
-                ##print(len(fft_amp))
-                ##print(fft_amp)
-                #img = img.clear()
-                #x_shift = 0
-                #for i in range(512):
-                    #hist_height = fft_amp[i]
-                    #img = img.draw_rectangle((x_shift, 0, 1, hist_height), [255,255,255], 1, True)
-                    ##print((x_shift, 0, 1, hist_height))
-                    #x_shift = x_shift + 1
-                #lcd.display(img)
-                #fft_amp.clear()
+                    #img = image.Image(size=(240, 240))
+                    #hist_width = 1 #changeable
+                    #x_shift = 0
+                    #for i in range(100):
+                        #temp = i2s.record(1024)
+                        #time.sleep_ms(10)
+                        #fft_res = FFT.run(temp.to_bytes(), 512)
+                        #fft_amp = FFT.amplitude(fft_res)
+                        ##print(len(fft_amp))
+                        ##print(fft_amp)
+                        #img = img.clear()
+                        #x_shift = 0
+                        #for i in range(512):
+                            #hist_height = fft_amp[i]
+                            #img = img.draw_rectangle((x_shift, 0, 1, hist_height), [255,255,255], 1, True)
+                            ##print((x_shift, 0, 1, hist_height))
+                            #x_shift = x_shift + 1
+                        #lcd.display(img)
+                        #fft_amp.clear()
 
-            #del img, i2s
-            #time.sleep_ms(2000)
+                    #del img, i2s
+                    #time.sleep_ms(2000)
 
         finally:
             pass

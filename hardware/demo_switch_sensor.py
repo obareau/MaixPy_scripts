@@ -18,7 +18,7 @@ while True:
         # sensor.set_hmirror(1)
         sensor.set_vflip(1)
         sensor.skip_frames(time=2000)
-        for i in range(50):
+        for _ in range(50):
             img = sensor.snapshot()
             lcd.display(img)
     except Exception as e:
@@ -31,7 +31,7 @@ while True:
         sensor.set_hmirror(1)
         sensor.set_vflip(1)
         sensor.skip_frames(time=2000)
-        for i in range(50):
+        for _ in range(50):
             img = sensor.snapshot().rotation_corr(z_rotation = +90)
             lcd.display(img)
     except Exception as e:

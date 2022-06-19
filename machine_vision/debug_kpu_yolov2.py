@@ -33,13 +33,13 @@ if __name__ == "__main__":
     with open("anchors.txt","r") as f:
         anchor_txt=f.read()
     #print(anchor_txt)
-    anchor=tuple([float(i) for i in anchor_txt.split(",")])
+    anchor = tuple(float(i) for i in anchor_txt.split(","))
     #print(anchor)
 
     with open("classes.txt","r") as f:
         labels_txt=f.read()
     #print(labels_txt)
-    labels=tuple([str(i) for i in labels_txt.split(",")])
+    labels = tuple(str(i) for i in labels_txt.split(","))
     #print(labels)
 
     import time
@@ -53,9 +53,7 @@ if __name__ == "__main__":
                 #print(time.ticks_ms() - last)
                 last = time.ticks_ms()
                 img = camera.get_image()
-                things = kpu.run_yolo2(KpuTask, img)
-                if things:
-
+                if things := kpu.run_yolo2(KpuTask, img):
                     for pos in range(len(things)):
                         i = things[pos]
                         img.draw_rectangle(320 - (i.x() + i.w()), i.y(), i.w(), i.h())

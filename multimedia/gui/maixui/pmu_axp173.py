@@ -105,9 +105,8 @@ class AXP173:
                 self.onLongPressedListener(self)
             print("after enter sleep is never called")
 
-        if pek_stu & (0x01 << 1):
-            if self.onPressedListener:
-                self.onPressedListener(self)
+        if pek_stu & (0x01 << 1) and self.onPressedListener:
+            self.onPressedListener(self)
 
     def __write_reg(self, reg_address, value):
         self.i2cDev.writeto_mem(
@@ -167,16 +166,12 @@ class AXP173:
                               self.__get_coulomb_discharge_data) / 3600.0 / 25.0
 
     def getPowerWorkMode(self):
-        mode = self.__read_reg(0x01)
         #print("Work mode: " + hex(mode))
-        return mode
+        return self.__read_reg(0x01)
 
     def is_charging(self):
         mode = self.getPowerWorkMode()
-        if (self.__is_bit_set(mode, 6)):
-            return True
-        else:
-            return False
+        return bool((self.__is_bit_set(mode, 6)))
         #return True if () else False
 
     def getVbatVoltage(self):
@@ -212,11 +207,9 @@ class AXP173:
         IinCnx_LSB = self.__read_reg(0x5C)
         IinCnx_MSB = self.__read_reg(0x5D)
 
-        # AXP173-DS PG26 0.625mA/div
-        current = ((IinCnx_LSB << 4) + IinCnx_MSB) * 0.625
         # print("current data:" + hex(((IinCnx_LSB << 4) + IinCnx_MSB)))
         # print("current:" + str(current))
-        return current
+        return ((IinCnx_LSB << 4) + IinCnx_MSB) * 0.625
         #return ((IinCnx_LSB << 4) + IinCnx_MSB) * 0.625
 
     def getBatteryChargeCurrent(self):
@@ -263,17 +256,11 @@ class AXP173:
         if (but_stu & (0x1 << 1)):
             return 1
         else:
-            if (but_stu & (0x1 << 0)):
-                return 2
-            else:
-                return -1
+            return 2 if (but_stu & (0x1 << 0)) else -1
 
     def exten_output_enable(self, enable=True):
         enten_set = self.__read_reg(0x10)
-        if enable == True:
-            enten_set = enten_set | 0x04
-        else:
-            enten_set = enten_set & 0xFC
+        enten_set = enten_set | 0x04 if enable == True else enten_set & 0xFC
         return self.__write_reg(0x10, enten_set)
 
     def setEnterChargingControl(self, enable, volatge=_targevoltage_4200mV, current=_chargingCurrent_190mA):
@@ -330,11 +317,8 @@ if __name__ == "__main__":
     @ui.warp_template(ui.blank_draw)
     def test_pmu_axp173_draw():
         global axp173
-        tmp = []
-
         work_mode = axp173.getPowerWorkMode()
-        tmp.append("WorkMode:" + hex(work_mode))
-
+        tmp = [f"WorkMode:{hex(work_mode)}"]
         # 检测 电池电压
         vbat_voltage = axp173.getVbatVoltage()
         tmp.append("vbat_voltage: {0} V".format(vbat_voltage))
@@ -361,7 +345,7 @@ if __name__ == "__main__":
         #print("7 VUBSInputCurrent: " + str(USBInputCurrent) + "mA")
 
         getChargingControl = axp173.getChargingControl()
-        tmp.append("ChargingControl: {}".format(hex(getChargingControl)))
+        tmp.append(f"ChargingControl: {hex(getChargingControl)}")
 
         # 检测 是否正在充电
         if axp173.is_charging() == True:

@@ -173,13 +173,7 @@ class SX127x:
 
 
     def aquire_lock(self, lock = False):
-        if 0:  # MicroPython is single threaded, doesn't need lock.
-            if lock:
-                while self._lock:
-                    pass
-                self._lock = True
-            else:
-                self._lock = False
+        pass
 
 
     def println(self, string, implicitHeader = False):
@@ -251,12 +245,7 @@ class SX127x:
     def setSignalBandwidth(self, sbw):
         bins = (7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3)
 
-        bw = 9
-        for i in range(len(bins)):
-            if sbw <= bins[i]:
-                bw = i
-                break
-
+        bw = next((i for i in range(len(bins)) if sbw <= bins[i]), 9)
         self.writeRegister(REG_MODEM_CONFIG_1, (self.readRegister(REG_MODEM_CONFIG_1) & 0x0f) | (bw << 4))
 
 
@@ -329,12 +318,13 @@ class SX127x:
         self.aquire_lock(True)  # lock until TX_Done
 
         # irqFlags = self.getIrqFlags() should be 0x50
-        if (self.getIrqFlags() & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0:
-            if self._onReceive:
-                payload = self.read_payload()
-                self.aquire_lock(False)  # unlock when done reading
+        if (
+            self.getIrqFlags() & IRQ_PAYLOAD_CRC_ERROR_MASK
+        ) == 0 and self._onReceive:
+            payload = self.read_payload()
+            self.aquire_lock(False)  # unlock when done reading
 
-                self._onReceive(self, payload)
+            self._onReceive(self, payload)
 
         self.aquire_lock(False)  # unlock in any case.
 
@@ -370,7 +360,7 @@ class SX127x:
             self.readRegister(REG_RX_NB_BYTES)
 
         payload = bytearray()
-        for i in range(packetLength):
+        for _ in range(packetLength):
             payload.append(self.readRegister(REG_FIFO))
 
         self.collect_garbage()
@@ -398,16 +388,14 @@ class SX127x:
 
     def collect_garbage(self):
         gc.collect()
-        # if config_lora.IS_MICROPYTHON:
-        if 1:
-            print('[Memory - free: {}   allocated: {}]'.format(gc.mem_free(), gc.mem_alloc()))
+        print(f'[Memory - free: {gc.mem_free()}   allocated: {gc.mem_alloc()}]')
 
 def send(lora):
     counter = 0
     print("LoRa Sender")
     while True:
         payload = 'Hello ({0})'.format(counter)
-        print("Sending packet: \n{}\n".format(payload))
+        print(f"Sending packet: \n{payload}\n")
         lora.println(payload)
         counter += 1
         time.sleep(5)
@@ -420,10 +408,10 @@ def receive(lora):
         if lora.receivedPacket():
             try:
                 payload = lora.read_payload()
-                print("*** Received message ***\n{}".format(payload.decode()))
+                print(f"*** Received message ***\n{payload.decode()}")
             except Exception as e:
                 print(e)
-            print("with RSSI: {}\n".format(lora.packetRssi))
+            print(f"with RSSI: {lora.packetRssi}\n")
 
 if __name__ == "__main__":
     import time
@@ -431,7 +419,7 @@ if __name__ == "__main__":
     from Maix import GPIO
     from fpioa_manager import fm
     from micropython import const
-    
+
     ################### config ###################
     LORA_RST = const(20)
     LORA_CS = const(7)
@@ -458,9 +446,8 @@ if __name__ == "__main__":
     time.sleep_ms(10)
     rst.value(1)
     time.sleep_ms(100)
-    
+
     lora.init()
-    
 ####### receiver ###########
     receive(lora)
 

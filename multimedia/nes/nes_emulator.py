@@ -11,9 +11,9 @@ try:
   nes.init(nes.INPUT)
   nes.load("mario.nes")
   # nes.run("/sd/mario.nes")
-  for i in range(20000): # wait
+  for _ in range(20000):
     nes.loop()
-  for i in range(500):
+  for _ in range(500):
     nes.loop()
     nes.input(8, 0, 0) # input enter
     nes.loop()

@@ -19,6 +19,7 @@
     @license MIT
 '''
 
+
 import sensor, lcd
 from Maix import GPIO
 from fpioa_manager import fm
@@ -26,9 +27,6 @@ from board import board_info
 import os, sys
 import time
 import image
-
-#### image size ####
-set_windowing = (224, 224)       
 
 #### sensor config ####
 
@@ -39,7 +37,7 @@ try:
     sensor.set_jb_quality(95)         # for IDE display quality
 except Exception:
     pass # no IDE support
-if set_windowing:
+if set_windowing := (224, 224):
     sensor.set_windowing(set_windowing)
 # sensor.set_auto_gain(False)
 # sensor.set_auto_whitebal(False, rgb_gain_db=(0x52,0x40,0x4d))
@@ -67,10 +65,7 @@ key = GPIO(GPIO.GPIOHS0, GPIO.PULL_UP)
 def capture_main(key):
     def draw_string(img, x, y, text, color, scale, bg=None , full_w = False):
         if bg:
-            if full_w:
-                full_w = img.width()
-            else:
-                full_w = len(text)*8*scale+4
+            full_w = img.width() if full_w else len(text)*8*scale+4
             img.draw_rectangle(x-2,y-2, full_w, 16*scale, fill=True, color=bg)
         img = img.draw_string(x, y, text, color=color,scale=scale)
         return img

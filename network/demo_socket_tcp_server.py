@@ -17,16 +17,16 @@ def start_tcp_server(ip, port):
     try:
         sock.listen(1)
     except socket.error as e:
-        print("fail to listen on port %s" % e)
+        print(f"fail to listen on port {e}")
         sys.exit(1)
     while True:
         print("waiting for connection")
         client, addr = sock.accept()
         print('having a connection')
-        for i in range(5):
-          print('send message')
-          client.send(b'I am server')
-          print(client.recv(6))
+        for _ in range(5):
+            print('send message')
+            client.send(b'I am server')
+            print(client.recv(6))
         print('send OSError: [Errno 128(32)] ENOTCONN')
         client.close()
 

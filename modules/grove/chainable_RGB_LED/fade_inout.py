@@ -18,6 +18,7 @@ r = 0
 g = 0
 b = 0
 power = 0
+b = 0
 while True:
     
         
@@ -25,11 +26,9 @@ while True:
         if i%2 == 0:
             r = power
             g = 0
-            b = 0
         else:
             r = 0
             g = 255 - power
-            b = 0
         led.set_RGB(i, r, g, b)
     power = (power + 10) & 0xFF
     time.sleep_ms(10)

@@ -20,7 +20,7 @@ led_b = GPIO(GPIO.GPIO2, GPIO.OUT)
 key_input = GPIO(GPIO.GPIO3, GPIO.IN)
 
 status = 0
-for i in range(0, 20):
+for _ in range(20):
     led_r.value(status)
     time.sleep_ms(300)
     led_g.value(status)

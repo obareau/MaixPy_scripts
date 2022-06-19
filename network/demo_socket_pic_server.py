@@ -58,9 +58,7 @@ def receiveThread(conn):
     conn.settimeout(10)
     conn_end = False
     pack_size = 1024*5
-    while True:
-        if conn_end:
-            break
+    while not conn_end:
         img = b""
         tmp = b''
         while True:
@@ -92,9 +90,8 @@ def receiveThread(conn):
         if not img.startswith(b'\xFF\xD8') or not img.endswith(b'\xFF\xD9'):
             print("image error")
             continue
-        f = open("tmp.jpg", "wb")
-        f.write(img)
-        f.close()
+        with open("tmp.jpg", "wb") as f:
+            f.write(img)
         try:
             surface = pygame.image.load("tmp.jpg").convert()
             screen.blit(surface, (0, 0))

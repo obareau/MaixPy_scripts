@@ -21,8 +21,7 @@ if __name__ == "__main__":
     # start to parse the receive cmd
     while True:
         udatas = uart_t.read()
-        d = uart_t.parse(udatas)
-        if d:
+        if d := uart_t.parse(udatas):
             print(d)
 
 # send and reveive string

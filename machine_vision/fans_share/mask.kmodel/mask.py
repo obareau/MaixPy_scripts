@@ -13,11 +13,7 @@ def drawConfidenceText(image, rol, classid, value):
     text = ""
     _confidence = int(value * 100)
 
-    if classid == 1:
-        text = 'mask: ' + str(_confidence) + '%'
-    else:
-        text = 'no_mask: ' + str(_confidence) + '%'
-
+    text = f'mask: {_confidence}%' if classid == 1 else f'no_mask: {_confidence}%'
     image.draw_string(rol[0], rol[1], text, color=color_R, scale=2.5)
 
 
@@ -38,13 +34,12 @@ _ = kpu.init_yolo2(task, 0.5, 0.3, 5, anchor)
 img_lcd = image.Image()
 
 clock = time.clock()
-while (True):
+while True:
     clock.tick()
     img = sensor.snapshot()
-    code = kpu.run_yolo2(task, img)
-    if code:
+    if code := kpu.run_yolo2(task, img):
         totalRes = len(code)
-        
+
         for item in code:
             confidence = float(item.value())
             itemROL = item.rect()
